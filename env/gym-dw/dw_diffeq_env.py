@@ -53,6 +53,7 @@ class WellPlot3Env(gym.Env):
 
     #Method for updating plot in case user edits default values (ex: size,init/end state)
     def update_plot(self):
+        """Plots start pos, target and curve found from diff eq."""
         self.ax.cla()
         self.ax.plot(*zip(*self.curve), 'o-')
         self.ax.plot(self.init_state[0,0], self.init_state[0,1], "or", label="start", markersize=10)
@@ -68,12 +69,14 @@ class WellPlot3Env(gym.Env):
     ##################### OPENAI GYM ENV METHODS BELOW #######################
 
     def diff_eq(self, d2, d1, d0):
+        """Iterative method to solve simple 2nd ODE."""
         d1 += d2
         d0 += d1
         return d2, d1, d0
 
 
     def targethit(self, state):
+        """Checks if position of agent is inside target ball. """
         relpos = state[0] - self.targetball['center']
         if np.linalg.norm(relpos) < self.targetball['R']:
             return True
@@ -82,6 +85,7 @@ class WellPlot3Env(gym.Env):
 
 
     def step(self, action):
+        """Steps through one action decision and iterates substeps # times with diff eq """
         actionx = self.actions_dict[action[0]]
         actionz = self.actions_dict[action[1]]
         for i in range(self.substeps):
@@ -92,16 +96,18 @@ class WellPlot3Env(gym.Env):
         state = np.array([[self.x, self.z], [self.dx, self.dz], [self.d2x, self.d2z]])
         valid = self.valid_state(state)
         done = self.targethit(state)
+        # Reward if moved closer to target
         if (np.linalg.norm(state[0] - self.targetball['center'])) < \
         (np.linalg.norm(self.state[0] - self.targetball['center'])):
             self.reward += 1
-
+        # Reward if position inside bounds
         if valid == 0:
             self.reward -= 1
+        # Reward if target is reached
         if done:
             self.reward += 100
         
-        #reward = self.get_reward(self)
+        #reward = self.get_reward(self)  # Move rewards to separate function
         self.state = state
         return self.state, self.reward, done, {}
 
@@ -113,16 +119,12 @@ class WellPlot3Env(gym.Env):
     
     ########################### BONUS METHODS BELOW ###########################
 
-    #Returns the next step without changing state
-    def check_step(self,action):
-        action = self.actions_dict[action]
-        return np.array([self.state[0]+action[0], self.state[1]+action[1]])
-    
-
     def valid_state(self, state):
+        """Checks if state is within bounds """
         x = (self.stateLow[0,0] <= self.state[0,0]) and (self.state[0,0] <= self.stateHigh[0,0])
         z = (self.stateLow[0,1] <= self.state[0,1]) and (self.state[0,1] <= self.stateHigh[0,1])
         return x and z
+
 
     #Allows you to get reward for specified state
     def get_reward(self, state):
@@ -142,6 +144,7 @@ class WellPlot3Env(gym.Env):
         self.reward_dict[state] = reward
 
 
+# Just for testing, remove when using
 test = WellPlot3Env()
 for i in range(100):
     test.step([random.randint(0, 2), random.randint(0, 2)])
