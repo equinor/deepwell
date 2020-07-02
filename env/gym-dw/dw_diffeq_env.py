@@ -1,11 +1,14 @@
 import gym
 from gym import error, spaces, utils
-from gym.utils import seeding
+#from gym.utils import seeding
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 #gym.logger.set_level(40)
+
+
 
 class WellPlot3Env(gym.Env):
     metadata = {'render.modes': ['console']}
@@ -16,24 +19,19 @@ class WellPlot3Env(gym.Env):
         self.fig, self.ax = plt.subplots()
 
         self.reward_dict = {}
-        # self.actions_dict = {0:(-1,0), 1:(0,1), 2:(1,0)}        #Actions: 0:Left, 1:Down, 2:Right
+        self.actions_dict = {0:-0.01, 1:0, 2:0.01}        #Actions: 0:Decreaase, 1:Maintain, 2:Increase
         
         self.action_space = spaces.Tuple((spaces.Discrete(3), spaces.Discrete(3)))
-        """
-        self.action_space = spaces.Discrete(21)
-        self.actions_dict ={
-            0:-1,
-            1:-0.9, 2:-0.8, 3:-0.7,
-            4:-0.6, 
-            5:-0.5, 6:-0.4, 7:-0.3,
-            8:-0.2,
-            9:-0.1, 10:0, 11:0.1,
-            12:0.2,
-            13:0.3, 14:0.4, 15:0.5,
-            16:0.6, 17:0.7, 18:0.8,
-            19:0.9, 20:1
-        }
-      """
+
+        #Drilling state bounds:
+        self.stateLow = np.array([[0., 0.,], [-10., -25.], [-10., -25.]])
+        self.stateHigh = np.array([[1000, 2800,], [10., 25.], [1, 1]])
+        
+        self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh)
+
+        self.X = 1000 #Size in feet of position grid x perimeter
+        self.Z = 2800 #Size in feet of position grid y perimeter
+
         self.default_reward = 0                      #This is the default reward for an action that has not been assigned another by the agent yet
         self.substeps = 10
         self.curve = []
@@ -49,8 +47,6 @@ class WellPlot3Env(gym.Env):
         # Extend this to list of several targetballs and randomize variables later
 
         self.update_plot()
-        
-        self.seed()
 
     ###################### SETUP HELP METHODS BELOW #######################
 
@@ -61,8 +57,9 @@ class WellPlot3Env(gym.Env):
         self.ax.plot(self.init_state[0,0], self.init_state[0,1], "or", label="start", markersize=10)
         circle = plt.Circle(self.targetball['center'], self.targetball['R'], color='g', label='target')
         self.ax.add_artist(circle)
-        self.ax.set_xlim(-100, 1100)
-        self.ax.set_ylim(-100, 1100)
+
+        self.ax.set_xlim(-100, self.X)
+        self.ax.set_ylim(-100, self.Z)
         self.ax.invert_yaxis()
         self.ax.legend()
 
@@ -84,9 +81,8 @@ class WellPlot3Env(gym.Env):
 
 
     def step(self, action):
-        #action = self.actions_dict[action]
-        actionx = action*0.1
-        actionz = action*0.15
+        actionx = self.actions_dict[action[0]]
+        actionz = self.actions_dict[action[1]]
         for i in range(self.substeps):
             self.d2x, self.dx, self.x = self.diff_eq(actionx, self.dx, self.x)
             self.d2z, self.dz, self.z = self.diff_eq(actionz, self.dz, self.z)
@@ -126,9 +122,11 @@ class WellPlot3Env(gym.Env):
         action = self.actions_dict[action]
         return np.array([self.state[0]+action[0], self.state[1]+action[1]])
     
+
     def valid_state(self,state):
         return (0 <= state[0] <= (self.grid_width-1)*self.distance_points) and (0 <= state[1] <= (self.grid_height-1)*self.distance_points)
     
+
     #Allows you to get reward for specified state
     def get_reward(self, state):
         state = tuple(state)
@@ -149,6 +147,6 @@ class WellPlot3Env(gym.Env):
 
 test = WellPlot3Env()
 for i in range(100):
-    test.step(i/100)
+    test.step([random.randint(0, 2), random.randint(0, 2)])
 test.update_plot()
 plt.show()
