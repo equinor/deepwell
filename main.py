@@ -11,11 +11,18 @@ def main():
 
 
 
+
+
+
     #figure = agent.fig                   #Enter figure here from agent using agent.fig, agent.close() or agent.render() depending on implementation
 
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
-    application = MyApplication(figure)
+    try:
+        figure
+    except:
+        print("Figure for plotting in main.py is not defined or wrong type. \nFix in main.py or ignore if plotting is not relevant.")
 
+    application = MyApplication(figure)
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(8080)
 
