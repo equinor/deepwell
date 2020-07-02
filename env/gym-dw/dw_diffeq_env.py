@@ -19,6 +19,7 @@ class WellPlot3Env(gym.Env):
         self.fig, self.ax = plt.subplots()
 
         self.reward_dict = {}
+        self.reward = 0
         self.actions_dict = {0:-0.01, 1:0, 2:0.01}        #Actions: 0:Decreaase, 1:Maintain, 2:Increase
         
         self.action_space = spaces.Tuple((spaces.Discrete(3), spaces.Discrete(3)))
@@ -27,7 +28,7 @@ class WellPlot3Env(gym.Env):
         self.stateLow = np.array([[0., 0.,], [-10., -25.], [-10., -25.]])
         self.stateHigh = np.array([[1000, 2800,], [10., 25.], [1, 1]])
         
-        self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh)
+        self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh, dtype=np.float64)
 
         self.X = 1000 #Size in feet of position grid x perimeter
         self.Z = 2800 #Size in feet of position grid y perimeter
@@ -72,8 +73,8 @@ class WellPlot3Env(gym.Env):
         return d2, d1, d0
 
 
-    def targethit(self):
-        relpos = self.state[0] - self.targetball['center']
+    def targethit(self, state):
+        relpos = state[0] - self.targetball['center']
         if np.linalg.norm(relpos) < self.targetball['R']:
             return True
         else:
@@ -88,31 +89,26 @@ class WellPlot3Env(gym.Env):
             self.d2z, self.dz, self.z = self.diff_eq(actionz, self.dz, self.z)
             self.curve.append([self.x, self.z])
 
-        self.state = np.array([[self.x, self.z], [self.dx, self.dz], [self.d2x, self.d2z]])
-        done = self.targethit()
-        #reward = self.get_reward(self.state)
-        #return self.state, reward, done, {}
+        state = np.array([[self.x, self.z], [self.dx, self.dz], [self.d2x, self.d2z]])
+        valid = self.valid_state(state)
+        done = self.targethit(state)
+        if (np.linalg.norm(state[0] - self.targetball['center'])) < \
+        (np.linalg.norm(self.state[0] - self.targetball['center'])):
+            self.reward += 1
 
-
-    def render(self, path_x,path_y):
-
-        plt.xlim([0,(self.grid_width-1)*self.distance_points])
-        plt.ylim([(self.grid_height-1)*self.distance_points,0])
-
-        plt.xlabel('Depth') 
-        plt.ylabel('Horizontal  ')
-        self.subplot.plot(path_x, path_y)
-        self.subplot.grid()
-        self.subplot.set_axisbelow(True)
+        if valid == 0:
+            self.reward -= 1
+        if done:
+            self.reward += 100
         
-        return self.fig
+        #reward = self.get_reward(self)
+        self.state = state
+        return self.state, self.reward, done, {}
+
 
     def reset(self):
         self.state = self.init_state
         return self.state
-
-    def close(self):
-        return self.fig
 
     
     ########################### BONUS METHODS BELOW ###########################
@@ -123,9 +119,10 @@ class WellPlot3Env(gym.Env):
         return np.array([self.state[0]+action[0], self.state[1]+action[1]])
     
 
-    def valid_state(self,state):
-        return (0 <= state[0] <= (self.grid_width-1)*self.distance_points) and (0 <= state[1] <= (self.grid_height-1)*self.distance_points)
-    
+    def valid_state(self, state):
+        x = (self.stateLow[0,0] <= self.state[0,0]) and (self.state[0,0] <= self.stateHigh[0,0])
+        z = (self.stateLow[0,1] <= self.state[0,1]) and (self.state[0,1] <= self.stateHigh[0,1])
+        return x and z
 
     #Allows you to get reward for specified state
     def get_reward(self, state):
@@ -148,5 +145,8 @@ class WellPlot3Env(gym.Env):
 test = WellPlot3Env()
 for i in range(100):
     test.step([random.randint(0, 2), random.randint(0, 2)])
-test.update_plot()
+    test.update_plot()
+    print(test.reward)
+
 plt.show()
+
