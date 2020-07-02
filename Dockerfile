@@ -9,7 +9,7 @@
 
     #Install our custom openai gym
     COPY env ./
-    RUN pip install --no-cache-dir -e ./gym-ww
+    RUN pip install --no-cache-dir -e ./gym-dw
 
     CMD [ "python","-u","/app/main.py" ]
 
