@@ -1,11 +1,13 @@
 
 from plothandler import *                           #Import the server that plots the result in browser
-
+from run_dw_env.run_dw_env import *
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
 
 def main():
     ###### INSTANTIATE AND TRAIN YOUR AGENT HERE ######
 
+    agent = run_dw()
+    figure = agent.get_plot()
 
 
 
