@@ -12,64 +12,84 @@ class DeepWellEnv(gym.Env):
         
         self.action_space = spaces.MultiDiscrete([3]*2)
         #Drilling state bounds:
-        self.stateLow = np.array([0, 0, -1., -1., 0, 1000])
-        self.stateHigh = np.array([3000, 3000, 1., 1., 3000,3000])
+        self.stateLow = np.array([-3000, -3000, -1., -1.])
+        self.stateHigh = np.array([3000, 3000, 1., 1.])
         
         self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh, dtype=np.float64)
-        self.x0 = 0.0 #decided in init_states()
-        self.y0 = 0.0 #decided in init_states()
-        self.x0d = 0.0
-        self.y0d = 1.0
-        self.xtarget = 0 #decided in init_states()
-        self.ytarget = 0 #decided in init_states()
+        self.xmin = 0
+        self.xmax = 3000
+        self.ymin = 0
+        self.ymax = 3000
+        self.x = 0.0            #decided in init_states()
+        self.y = 0.0            #decided in init_states()
+        self.xd0 = 0.0
+        self.yd0 = 1.0
+        self.xd = 0             #decided in init_states()
+        self.yd = 0             #decided in init_states()
+        self.xtarget = 0        #decided in init_states()
+        self.ytarget = 0        #decided in init_states()
+        self.xdist = 0          #decided in init_states()
+        self.ydist = 0          #decided in init_states()
         self.radius_target = 100
-        self.stepsize = 1#Number of timesteps between each decision
-        self.state = self.init_states() #[x, y, xd, yd, xtarget, ytarget]
+        self.stepsize = 1       #Number of timesteps between each decision
+        self.state = self.init_states() #[xdist, ydist, xd, yd]
         
           
     def step(self, action):
-        acc = (action - 1)/10 #Make acceleration input lay in range [-0.1 -> 0.1]
+        acc = (action - 1)/100 #Make acceleration input lay in range [-0.1 -> 0.1]
         done = False
-        dist = np.linalg.norm([self.state[4]-self.state[0],self.state[5]-self.state[1]]) #Distance to target
+        dist = np.linalg.norm([self.xdist,self.ydist]) #Distance to target
         for _ in range(self.stepsize): #Calculate next states
-            xd = acc[0] + self.state[2] #update xd
-            yd = acc[1] + self.state[3] #update yd
+            xd = acc[0] + self.xd           #update xd (unnormalized)
+            yd = acc[1] + self.yd           #update yd (unnormalized)
             velocity = np.linalg.norm([xd,yd])
             if velocity == 0:
                 velocity = 1
             normal_vel = np.array([xd, yd])/velocity
-            self.state[2] = normal_vel[0]
-            self.state[3] = normal_vel[1]
-            self.state[0] = self.state[0] + normal_vel[0] #update x with updated and normalized vel. vector 
-            self.state[1] = self.state[1] + normal_vel[1] #update y with updated and normalized vel. vector 
-        dist_new = np.linalg.norm([self.state[4]-self.state[0],self.state[5]-self.state[1]]) #New distance to target       
+            self.xd = normal_vel[0]         #update normalized vel. vector 
+            self.yd = normal_vel[1]         #update normalized vel. vector 
+            self.x = self.x + self.xd       #update x 
+            self.y = self.y + self.yd       #update y
+        self.xdist = self.xtarget-self.x
+        self.ydist = self.ytarget-self.y
+        #Update state vector
+        self.state[0] = self.xdist
+        self.state[1] = self.ydist
+        self.state[2] = self.xd
+        self.state[3] = self.yd
+
+        #Check new distance (reward)
+        dist_new = np.linalg.norm([self.xdist,self.ydist]) #New distance to target       
         dist_diff = dist_new - dist
         reward = -dist_diff
 
-        #Check if outside grid
-        if (self.state[0]<self.stateLow[0]) or (self.state[1]<self.stateLow[1]) or (self.state[0]>self.stateHigh[0]) or (self.state[1]>self.stateHigh[1]):
+        #Check if outside grid (reward)
+        if (self.x<self.xmin) or (self.y<self.ymin) or (self.x>self.xmax) or (self.y>self.ymax):
             reward -=100
             done = True
-        #Check if in radius of target
+        #Check if in radius of target (reward)
         if dist_new < self.radius_target:
             reward += 100
             done = True
         
-        return self.state, reward, done, {}
+        info = {'x':self.x, 'y':self.y, 'xt':self.xtarget, 'yt':self.ytarget}
+        return self.state, reward, done, info
 
 
 
     def init_states(self):
         self.xtarget = random.randint(0,3000)
         self.ytarget = random.randint(1000,3000)
-        self.x0 = random.randint(0,3000)
-        self.y0 = random.randint(0,1000)
-        self.state = np.array([self.x0,
-            self.y0,
-            self.x0d,
-            self.y0d,
-            self.xtarget,
-            self.ytarget])
+        self.x = random.randint(0,3000)
+        self.y = random.randint(0,1000)
+        self.xdist = self.x-self.xtarget
+        self.ydist = self.y-self.ytarget
+        self.xd = self.xd0
+        self.yd = self.yd0
+        self.state = np.array([self.xdist,
+            self.ydist,
+            self.xd,
+            self.yd])
         return self.state
         
     def reset(self):
