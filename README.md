@@ -20,6 +20,7 @@ You can also combine the shortened version of the flags to do more things:
 | Flag |  Action|
 |--|--|
 | -r |  Run|
+| -rt | Run with new training |
 | -br | Build + Run |
 | -rs |  Run + Show|
 |-brs|Build + Run + Show |
