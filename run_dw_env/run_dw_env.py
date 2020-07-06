@@ -40,6 +40,7 @@ class run_dw:
             action, _states = model.predict(self.obs)
             self.obs, rewards, done, info = self.env.step(action)
             print(self.obs)
+            print(info)
             print("reward: ",rewards)
             self.xcoord.append(info['x'])
             self.ycoord.append(info['y'])
