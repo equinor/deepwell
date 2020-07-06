@@ -7,35 +7,40 @@ from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
 import matplotlib
 import matplotlib.pyplot as plt
+import sys
 
 class run_dw:
     def __init__(self):
-        env = gym.make('DeepWellEnv-v0')
-        ######## use TRPO or PPO2
-        #model = TRPO(MlpPolicy, env, verbose=1)
-        model = PPO2(MlpPolicy, env, verbose=1)
-        model.learn(total_timesteps=100000)
-
+        self.env = gym.make('DeepWellEnv-v0')
         self.xcoord = []
         self.ycoord = []
-        self.obs = env.reset()
+        self.obs = self.env.reset()
 
+        
+    #Get model either by training a new one or loading an old one
+    def get_model(self):
+            if len(sys.argv)>1:
+                ######## use TRPO or PPO2
+                #model = TRPO(MlpPolicy, env, verbose=1, tensorboard_log='logs/')
+                #To train model run script with an argument (doesn't matter what)
+                model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log="logs/")
+                model.learn(total_timesteps = 100000)
+                model.save("ppo2_shortpath")
+                return model
+            else:
+                #Else it will load a saved one
+                model = PPO2.load("ppo2_shortpath", tensorboard_log="logs/")
+                return model
+
+    #Test the trained model, run until done, return list of visited coords
+    def test_model(self,model):
         while True:
             action, _states = model.predict(self.obs)
-            self.obs, rewards, done, info = env.step(action)
+            self.obs, rewards, done, info = self.env.step(action)
             print(self.obs)
             print("reward: ",rewards)
             self.xcoord.append(self.obs[0])
             self.ycoord.append(self.obs[1])
             if done:
                 break
-
-    def get_plot(self):
-        fig = plt.figure()
-        subplot = fig.add_subplot(111)
-        subplot.plot(self.xcoord,self.ycoord)
-        plt.gca().invert_yaxis()
-        subplot.scatter(self.obs[4],self.obs[5],s=150)
-        plt.xlabel("Cross Section")
-        plt.ylabel("TVD")
-        return fig
+        return self.xcoord, self.ycoord

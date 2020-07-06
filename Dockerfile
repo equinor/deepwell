@@ -10,11 +10,14 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+#To be able to load model, should prob remove later but weren't able to figure out different solutio
+COPY ppo2_shortpath.zip ./
+
 
 #Install our custom openai gym
 COPY env ./
 RUN pip install --no-cache-dir -e ./gym-dw
 
-CMD [ "python","-u","/app/main.py" ]
+ENTRYPOINT [ "python","-u","/app/main.py" ]
 
 #The "-u" is there to run it "unbuffered". That means that the printed output from python wil be shown in our host terminal, not the invisible container terminal

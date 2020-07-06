@@ -26,7 +26,17 @@ class DeepWellEnv(gym.Env):
         self.stepsize = 1#Number of timesteps between each decision
         self.state = self.init_states() #[x, y, xd, yd, xtarget, ytarget]
         
-          
+    #Create figure to send to server
+    def render(self, xcoord, ycoord):
+        fig = plt.figure()
+        subplot = fig.add_subplot(111)
+        subplot.plot(xcoord,ycoord)
+        plt.gca().invert_yaxis()
+        subplot.scatter(self.xtarget,self.ytarget,s=150)
+        plt.xlabel("Horizontal")
+        plt.ylabel("Depth")
+        return fig
+
     def step(self, action):
         acc = (action - 1)/10 #Make acceleration input lay in range [-0.1 -> 0.1]
         done = False
