@@ -15,6 +15,8 @@ class run_dw:
         self.xcoord = []
         self.ycoord = []
         self.obs = self.env.reset()
+        self.xt = 0
+        self.yt = 0
 
         
     #Get model either by training a new one or loading an old one
@@ -39,8 +41,10 @@ class run_dw:
             self.obs, rewards, done, info = self.env.step(action)
             print(self.obs)
             print("reward: ",rewards)
-            self.xcoord.append(self.obs[0])
-            self.ycoord.append(self.obs[1])
+            self.xcoord.append(info['x'])
+            self.ycoord.append(info['y'])
             if done:
+                self.xt = info['xt']
+                self.yt = info['yt']
                 break
         return self.xcoord, self.ycoord
