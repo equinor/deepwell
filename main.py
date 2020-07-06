@@ -6,14 +6,17 @@ from run_dw_env.run_dw_env import *
 #import gym
 #from gym_dw import envs
 
+#Env names:
+#agent = gym.make('DeepWellEnv-v0')
+#agent = gym.make('DwDiffeqEnv-v0')
 
 def main():
     ###### INSTANTIATE AND TRAIN YOUR AGENT HERE ######
 
     #Remember to move your agent into its own folder (look at the run_dw_env folder), then import it here before commiting and pushing
 
-    #agent = gym.make('DeepWellEnv-v0')
-    #agent = gym.make('DwDiffeqEnv-v0')
+    agent = run_dw()
+    figure = agent.get_plot()
 
 
 
