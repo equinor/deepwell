@@ -3,20 +3,23 @@ from plothandler import *                           #Import the server that plot
 from run_dw_env.run_dw_env import *
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
 
+#import gym
+#from gym_dw import envs
+
+
 def main():
     ###### INSTANTIATE AND TRAIN YOUR AGENT HERE ######
 
-    agent = run_dw()
-    figure = agent.get_plot()
+    #Remember to move your agent into its own folder (look at the run_dw_env folder), then import it here before commiting and pushing
+
+    #agent = gym.make('DeepWellEnv-v0')
+    #agent = gym.make('DwDiffeqEnv-v0')
 
 
 
 
 
-
-
-
-    #figure = agent.fig                   #Enter figure here from agent using agent.fig, agent.close() or agent.render() depending on implementation
+    #figure = agent.get_plot()                   #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
 
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
     try:

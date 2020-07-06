@@ -10,11 +10,11 @@ import random
 
 
 
-class WellPlot3Env(gym.Env):
+class DwDiffeqEnv(gym.Env):
     metadata = {'render.modes': ['console']}
 
     def __init__(self):
-        super(WellPlot3Env, self).__init__()
+        super(DwDiffeqEnv, self).__init__()
 
         self.fig, self.ax = plt.subplots()
 
@@ -143,13 +143,9 @@ class WellPlot3Env(gym.Env):
         state = tuple(state)
         self.reward_dict[state] = reward
 
+    def get_plot(self):
+        return self.fig
 
-# Just for testing, remove when using
-test = WellPlot3Env()
-for i in range(100):
-    test.step([random.randint(0, 2), random.randint(0, 2)])
-    test.update_plot()
-    print(test.reward)
+    
 
-plt.show()
 
