@@ -31,7 +31,8 @@ class run_dw:
                 return model
             else:
                 #Else it will load a saved one
-                model = PPO2.load("ppo2_shortpath", tensorboard_log="logs/")
+                #remove "/app/" if not running with docker
+                model = PPO2.load("/app/ppo2_shortpath", tensorboard_log="logs/")
                 return model
 
     #Test the trained model, run until done, return list of visited coords
