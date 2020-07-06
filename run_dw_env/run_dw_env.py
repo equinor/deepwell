@@ -23,11 +23,11 @@ class run_dw:
     def get_model(self):
             if len(sys.argv)>1:
                 ######## use TRPO or PPO2
-                #model = TRPO(MlpPolicy, env, verbose=1, tensorboard_log='logs/')
+                model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
                 #To train model run script with an argument (doesn't matter what)
-                model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log="logs/")
-                model.learn(total_timesteps = 100000)
-                model.save("ppo2_shortpath")
+                #model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log="logs/")
+                model.learn(total_timesteps = 250000)
+                model.save("trpo_dw_250k")
                 return model
             else:
                 #Else it will load a saved one

@@ -41,6 +41,8 @@ class DeepWellEnv(gym.Env):
         subplot.plot(xcoord,ycoord)
         plt.gca().invert_yaxis()
         subplot.scatter(self.xtarget,self.ytarget,s=150)
+        plt.xlim([self.xmin,self.xmax])
+        plt.ylim([self.ymin,self.ymax])
         plt.xlabel("Horizontal")
         plt.ylabel("Depth")
         return fig
