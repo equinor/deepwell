@@ -30,13 +30,13 @@ class DeepWellEnv(gym.Env):
         self.ytarget = 0        #decided in init_states()
         self.xdist = 0          #decided in init_states()
         self.ydist = 0          #decided in init_states()
-        self.radius_target = 100
+        self.radius_target = 50
         self.stepsize = 1       #Number of timesteps between each decision
         self.state = self.init_states() #[xdist, ydist, xd, yd]
         
           
     def step(self, action):
-        acc = (action - 1)/100 #Make acceleration input lay in range [-0.1 -> 0.1]
+        acc = (action - 1)/200 #Make acceleration input lay in range [-0.01 -> 0.01]
         done = False
         dist = np.linalg.norm([self.xdist,self.ydist]) #Distance to target
         for _ in range(self.stepsize): #Calculate next states
@@ -57,7 +57,8 @@ class DeepWellEnv(gym.Env):
         self.state[1] = self.ydist
         self.state[2] = self.xd
         self.state[3] = self.yd
-
+        #print("xtarget: ", self.xtarget, "  ytarget: ", self.ytarget)
+        #print("x: ",self.x, "   y: ", self.y)
         #Check new distance (reward)
         dist_new = np.linalg.norm([self.xdist,self.ydist]) #New distance to target       
         dist_diff = dist_new - dist
@@ -67,9 +68,14 @@ class DeepWellEnv(gym.Env):
         if (self.x<self.xmin) or (self.y<self.ymin) or (self.x>self.xmax) or (self.y>self.ymax):
             reward -=100
             done = True
+
+        #TEST REWARD
+        if dist_new < 500:
+            r = (max(self.xd/np.sign(self.xdist),0))*(500-np.abs(self.ydist))/500
+            reward += r**2
         #Check if in radius of target (reward)
         if dist_new < self.radius_target:
-            reward += 100
+            reward += 500*(2-np.abs(self.yd)) #Promote horizontal end of trajectory
             done = True
         
         info = {'x':self.x, 'y':self.y, 'xt':self.xtarget, 'yt':self.ytarget}
