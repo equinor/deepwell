@@ -54,9 +54,6 @@ class DeepWellEnv2(gym.Env):
     def get_reward(self, dist_diff):
         # Reward if moved closer to target and penalise if moved further away
         done = False
-        #reward = 0
-       # if dist_diff > 0:
-        #    reward += 1
         reward = - dist_diff
         
         valid = self.valid_state()
