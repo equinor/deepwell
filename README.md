@@ -79,4 +79,4 @@ Note that if you edit for example the env, you have to build the container again
 
 To get tensoboard running open a new window and run the following bash command
 
-'$ tensorboard --logdir ./logs/
+'$ tensorboard --logdir ./logs/'
