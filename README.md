@@ -20,6 +20,7 @@ You can also combine the shortened version of the flags to do more things:
 | Flag |  Action|
 |--|--|
 | -r |  Run|
+| -rt | Run with new training |
 | -br | Build + Run |
 | -rs |  Run + Show|
 |-brs|Build + Run + Show |
@@ -73,3 +74,9 @@ Then just run again.
   
 
 Note that if you edit for example the env, you have to build the container again for the changes to take effect. If you are not seeing your changes being applied, try rebuilding.
+
+## Running tensorboard
+
+To get tensoboard running open a new window and run the following bash command
+
+` $ tensorboard --logdir ./logs/ `

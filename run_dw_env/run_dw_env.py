@@ -5,32 +5,43 @@ from stable_baselines import TRPO
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
-from stable_baselines import HER, DQN, SAC, DDPG, TD3
-from stable_baselines.her import GoalSelectionStrategy, HERGoalEnvWrapper
-from stable_baselines.common.bit_flipping_env import BitFlippingEnv
 import matplotlib
 import matplotlib.pyplot as plt
+import sys
 
 class run_dw:
     def __init__(self):
-        env = gym.make('DeepWellEnv-v0')
-        ######## use TRPO or PPO2
-        model = TRPO(MlpPolicy, env, verbose=1, gamma = 0.9)
-        #model = PPO2(MlpPolicy, env, verbose=1)
-        model.learn(total_timesteps=1000000)
-        #model.save("trpo_dw")
-        #model = TRPO.load("trpo_dw")
-
+        self.env = gym.make('DeepWellEnv-v0')
         self.xcoord = []
         self.ycoord = []
-        self.obs = env.reset()
+        self.obs = self.env.reset()
         self.xt = 0
         self.yt = 0
 
+        
+    #Get model either by training a new one or loading an old one
+    def get_model(self):
+            if len(sys.argv)>1:
+                ######## use TRPO or PPO2
+                model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
+                #To train model run script with an argument (doesn't matter what)
+                #model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log="logs/")
+                model.learn(total_timesteps = 250000)
+                model.save("trpo_dw_250k")
+                return model
+            else:
+                #Else it will load a saved one
+                #remove "/app/" if not running with docker
+                model = PPO2.load("/app/ppo2_shortpath", tensorboard_log="logs/")
+                return model
+
+    #Test the trained model, run until done, return list of visited coords
+    def test_model(self,model):
         while True:
             action, _states = model.predict(self.obs)
-            self.obs, rewards, done, info = env.step(action)
+            self.obs, rewards, done, info = self.env.step(action)
             print(self.obs)
+            print(info)
             print("reward: ",rewards)
             self.xcoord.append(info['x'])
             self.ycoord.append(info['y'])
@@ -38,13 +49,4 @@ class run_dw:
                 self.xt = info['xt']
                 self.yt = info['yt']
                 break
-
-    def get_plot(self):
-        fig = plt.figure()
-        subplot = fig.add_subplot(111)
-        subplot.plot(self.xcoord,self.ycoord)
-        plt.gca().invert_yaxis()
-        subplot.scatter(self.xt,self.yt,s=150)
-        plt.xlabel("Cross Section")
-        plt.ylabel("TVD")
-        return fig
+        return self.xcoord, self.ycoord

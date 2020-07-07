@@ -34,7 +34,19 @@ class DeepWellEnv(gym.Env):
         self.stepsize = 1       #Number of timesteps between each decision
         self.state = self.init_states() #[xdist, ydist, xd, yd]
         
-          
+    #Create figure to send to server
+    def render(self, xcoord, ycoord):
+        fig = plt.figure()
+        subplot = fig.add_subplot(111)
+        subplot.plot(xcoord,ycoord)
+        plt.gca().invert_yaxis()
+        subplot.scatter(self.xtarget,self.ytarget,s=150)
+        plt.xlim([self.xmin,self.xmax])
+        plt.ylim([self.ymin,self.ymax])
+        plt.xlabel("Horizontal")
+        plt.ylabel("Depth")
+        return fig
+         
     def step(self, action):
         acc = (action - 1)/200 #Make acceleration input lay in range [-0.01 -> 0.01]
         done = False
@@ -72,7 +84,7 @@ class DeepWellEnv(gym.Env):
         #TEST REWARD
         if dist_new < 500:
             r = (max(self.xd/np.sign(self.xdist),0))*(500-np.abs(self.ydist))/500
-            reward += r**2
+            reward += r
         #Check if in radius of target (reward)
         if dist_new < self.radius_target:
             reward += 500*(2-np.abs(self.yd)) #Promote horizontal end of trajectory

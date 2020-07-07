@@ -8,11 +8,16 @@ param (
 	[switch]$rs = $false,
 	[switch]$br = $false,
 	[switch]$brs = $false,
-	[switch]$bs = $false
+	[switch]$bs = $false,
+	[switch]$rt = $false,
+	[switch]$runt = $false
 )
 
 if ($build -or $b) {
     docker build -t deepwell-app .
+}
+elseif ($runt -or $rt) {
+	docker rm -f dwrunning ; docker run -it --mount type=bind,source="$(pwd)",target=/app -p 8080:8080 --name dwrunning deepwell-app -2
 }
 elseif ($run -or $r) {
     docker rm -f dwrunning ; docker run -it --mount type=bind,source="$(pwd)",target=/app -p 8080:8080 --name dwrunning deepwell-app

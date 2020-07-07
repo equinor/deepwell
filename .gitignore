@@ -1,3 +1,5 @@
 __pycache__
 __pycache__/
 env/gym-dw/gym_dw.egg-info
+.vscode
+.vscode/

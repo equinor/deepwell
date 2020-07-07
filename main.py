@@ -15,14 +15,16 @@ def main():
 
     #Remember to move your agent into its own folder (look at the run_dw_env folder), then import it here before commiting and pushing
 
+    #Set up environment
     agent = run_dw()
-    figure = agent.get_plot()
 
-
-
-
-
-    #figure = agent.get_plot()                   #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
+    #Train or load model
+    model = agent.get_model()
+    
+    #Test model and get lists of visited coordinates
+    xcoord,ycoord = agent.test_model(model)
+    
+    figure = agent.env.render(xcoord,ycoord) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
 
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
     try:
