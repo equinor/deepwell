@@ -40,8 +40,7 @@ class DeepWellEnv2(gym.Env):
             if velocity == 0:
                 velocity = 1
             self.state[1] = np.array([dx, dz])/velocity  # Normalised velocity
-            self.state[0] += self.state[1] #update pos with updated and normalized vel. vector 
-            self.state[0] += self.state[1] #update pos with updated and normalized vel. vector 
+            self.state[0] += self.state[1] #update pos with updated and normalized vel. vector
         
         new_dist = np.linalg.norm(self.state[0] - self.targetball['center'])
         dist_diff = new_dist - old_dist
