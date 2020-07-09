@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import random
 
 
+
 class DeepWellEnv(gym.Env):
     
     def __init__(self):
@@ -42,7 +43,7 @@ class DeepWellEnv(gym.Env):
         plt.gca().invert_yaxis()
         subplot.scatter(self.xtarget,self.ytarget,s=150)
         plt.xlim([self.xmin,self.xmax])
-        plt.ylim([self.ymin,self.ymax])
+        plt.ylim([self.ymax,self.ymin])
         plt.xlabel("Horizontal")
         plt.ylabel("Depth")
         return fig
