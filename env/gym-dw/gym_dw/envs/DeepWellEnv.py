@@ -43,12 +43,18 @@ class DeepWellEnv(gym.Env):
         self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh, dtype=np.float64)
 
     #Create figure to send to server
-    def render(self, xcoord, ycoord):
+    def render(self, xcoord, ycoord, xt, yt):
         fig = plt.figure()
         subplot = fig.add_subplot(111)
         subplot.plot(xcoord,ycoord)
         plt.gca().invert_yaxis()
-        subplot.scatter(self.xtarget,self.ytarget,s=150)
+        
+        for i in range(len(xt)):
+            x = xt[i]
+            y = yt[i]    
+            plt.scatter(x,y,s=150)
+            plt.annotate(i+1, (x,y))
+
         plt.xlim([self.xmin,self.xmax])
         plt.ylim([self.ymax,self.ymin])
         plt.xlabel("Horizontal")

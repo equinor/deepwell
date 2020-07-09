@@ -4,7 +4,7 @@ import numpy as np
 import random
 
 
-class DeepWellEnv2(gym.Env):
+class DwDiffeqEnv(gym.Env):
     metadata = {'render.modes': ['console']}
 
     def __init__(self):

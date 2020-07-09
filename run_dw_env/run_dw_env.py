@@ -46,8 +46,8 @@ class run_dw:
                 ######To train model run script with an argument (doesn't matter what)
                 #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
                 model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log="logs/")
-                model.learn(total_timesteps = 100000, tb_log_name='100k_')
-                model.save("ppo2_100k_evalcallback")
+                model.learn(total_timesteps = 200000, tb_log_name='200k_new_cb')
+                model.save("ppo2_200k_newenv_cb")
                 return model
             else:
                 #Else it will load a saved one
@@ -78,8 +78,12 @@ class run_dw:
             self.xcoord.append(info['x'])
             self.ycoord.append(info['y'])
             if done:
-                self.xt = info['xt']
-                self.yt = info['yt']
+                hits = info['hits']
+                self.xt = info['xtargets']
+                self.yt = info['ytargets']
                 break
+        print("Minimum total distance: ",info['min_dist'])
+        print("Distance traveled: ",info['tot_dist'])    
+        print("Target hits:     ", hits)
         self.env.close()
-        return self.xcoord, self.ycoord
+        return self.xcoord, self.ycoord, self.xt, self.yt
