@@ -31,8 +31,10 @@ class run_dw:
         self.xcoord = []
         self.ycoord = []
         self.obs = self.env.reset()
-        self.xt = 0
-        self.yt = 0
+        self.xt = []
+        self.yt = []
+        self.xhz = []
+        self.yhz = []
 
         
     #Get model either by training a new one or loading an old one
@@ -84,9 +86,11 @@ class run_dw:
                 hits = info['hits']
                 self.xt = info['xtargets']
                 self.yt = info['ytargets']
+                self.xhz = info['xhazards']
+                self.yhz = info['yhazards']
                 break
         print("Minimum total distance: ",info['min_dist'])
         print("Distance traveled: ",info['tot_dist'])    
         print("Target hits:     ", hits)
         self.env.close()
-        return self.xcoord, self.ycoord, self.xt, self.yt
+        return self.xcoord, self.ycoord, self.xt, self.yt, self.xhz, self.yhz

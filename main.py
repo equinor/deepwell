@@ -22,9 +22,9 @@ def main():
     model = agent.get_model()
     
     #Test model and get lists of visited coordinates
-    xcoord,ycoord, xt, yt = agent.test_model(model)
+    xcoord,ycoord, xt, yt, xhz, yhz = agent.test_model(model)
     
-    figure = agent.env.render(xcoord,ycoord, xt, yt) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
+    figure = agent.env.render(xcoord,ycoord, xt, yt, xhz, yhz) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
 
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
     try:
