@@ -31,10 +31,10 @@ class DeepWellEnv(gym.Env):
         self.xdist_hazard = 0    #decided in init_states()
         self.ydist_hazard = 0    #decided in init_states()
         self.numtargets = 10     #==SET NUMBER OF TARGETS==#
-        self.radius_target = 50
+        self.min_radius = 50
+        self.max_radius = 50
         self.target_hits = 0        
-        self.targets = []        #initialized in init_states()
-
+        
         self.numhazards = 5     #==SET NUMBER OF HAZARDS==# 
         self.radius_hazard = 100    
         self.hazards = []        #initialized in init_states()
@@ -85,8 +85,8 @@ class DeepWellEnv(gym.Env):
             self.y = self.y + self.yd       #update y
         
         #Calculate and update distance to target(s)
-        self.xdist1 = self.targets[self.target_hits][0]-self.x  #x-axis distance to next target
-        self.ydist1 = self.targets[self.target_hits][1]-self.y  #y-axis distance to next target
+        self.xdist1 = self.targets[self.target_hits]['pos'][0]-self.x  #x-axis distance to next target
+        self.ydist1 = self.targets[self.target_hits]['pos'][1]-self.y  #y-axis distance to next target
 
         self.state[0] = self.xdist1
         self.state[1] = self.ydist1
@@ -122,15 +122,15 @@ class DeepWellEnv(gym.Env):
             done = True
 
         #Check if inside target radius (reward)
-        if dist_new < self.radius_target:
+        if dist_new < self.targets[self.target_hits]['radius']: #self.radius_target:
             reward += 3000
             self.target_hits += 1
            
             if self.target_hits == self.numtargets:
                 done = True
             else:
-                self.xdist1 = self.targets[self.target_hits][0]-self.x  #x-axis distance to next target
-                self.ydist1 = self.targets[self.target_hits][1]-self.y  #y-axis distance to next target
+                self.xdist1 = self.targets[self.target_hits]['pos'][0]-self.x  #x-axis distance to next target
+                self.ydist1 = self.targets[self.target_hits]['pos'][1]-self.y  #y-axis distance to next target
             
         #Check if maximum travel range has been reached
         self.dist_traveled += self.stepsize
@@ -139,8 +139,8 @@ class DeepWellEnv(gym.Env):
             done = True
 
         #Info for plotting and printing in run-file
-        info = {'x':self.x, 'y':self.y, 'xtargets': [element[0] for element in self.targets],
-                'ytargets': [element[1] for element in self.targets], 'hits': self.target_hits, 'tot_dist':self.dist_traveled, 'min_dist':self.min_tot_dist,
+        info = {'x':self.x, 'y':self.y, 'xtargets': [target['pos'][0] for target in self.targets],
+                'ytargets': [target['pos'][1] for target in self.targets], 'hits': self.target_hits, 'tot_dist':self.dist_traveled, 'min_dist':self.min_tot_dist,
                 'xhazards': [element[0] for element in self.hazards],'yhazards': [element[1] for element in self.hazards]}
 
         return self.state, reward, done, info
@@ -156,12 +156,10 @@ class DeepWellEnv(gym.Env):
         self.xd = self.xd0
         self.yd = self.yd0
         #Initialize target(s)
-        self.targets = []
-        for _ in range(self.numtargets):
-            self.targets.append((random.randint(200,self.xmax-200),random.randint(1000,self.ymax-200)))
-        #Set distances to first target
-        self.xdist1 = self.x-self.targets[0][0]
-        self.ydist1 = self.y-self.targets[0][1]
+        self.targets = self.init_targets()
+        self.xdist1 = self.x-self.targets[0]['pos'][0]
+        self.ydist1 = self.y-self.targets[0]['pos'][1]
+
 
         #Initialize hazard(s)
         self.hazards = []
@@ -182,8 +180,8 @@ class DeepWellEnv(gym.Env):
         self.min_tot_dist = 0
         prev_p = np.array([self.x,self.y])
         for i in range(self.numtargets):
-            self.min_tot_dist += np.linalg.norm([self.targets[i][0]-prev_p[0],self.targets[i][1]-prev_p[1]])
-            prev_p = np.array(self.targets[i])
+            self.min_tot_dist += np.linalg.norm([self.targets[i]['pos'][0]-prev_p[0],self.targets[i]['pos'][1]-prev_p[1]])
+            prev_p = np.array(self.targets[i]['pos'])
             self.max_dist.append(self.rel_max_dist*self.min_tot_dist)
         
         self.max_tot_dist = self.rel_max_dist*self.min_tot_dist
@@ -195,6 +193,35 @@ class DeepWellEnv(gym.Env):
             self.xdist_hazard,
             self.ydist_hazard])
         return self.state
+
+
+    def init_targets(self):
+        """
+        Initiates targets that are drawn randomly from equally spaced bins in
+        x-direction. Constraint applied to max change in y-direction. Radius
+        randomly drawn between self.min_radius and self.max_radius.
+        """
+        # Separate targets in to equally spaced bins to avoid overlap
+        xsep = (self.xmax - self.xmin - 2*200)/self.numtargets
+        maxy_change = (self.ymax - 200 - 1000)/2
+
+        targets = []
+        for i in range(self.numtargets):
+            radius = random.randint(self.min_radius, self.max_radius)
+            # x drawn randomnly within bin edges minus the radius on each side
+            x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
+            if i == 0:
+                y = random.randint(1000, self.ymax - 200)
+            else: 
+                # y drawn randomly within its allowed values, with limit to ychange from previous target
+                y = random.randint(np.clip(y-maxy_change, 1000, self.ymax-200),
+                                     np.clip(y+maxy_change, 1000, self.ymax-200))
+            
+            targets.append({'pos': np.array([x,y]), 
+                                 'radius': radius,
+                                 'order':i})
+        return targets
+
         
     def reset(self):
         self.init_states()
