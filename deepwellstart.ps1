@@ -10,7 +10,9 @@ param (
 	[switch]$brs = $false,
 	[switch]$bs = $false,
 	[switch]$rt = $false,
-	[switch]$runt = $false
+	[switch]$runt = $false,
+	[switch]$rrt = $false,
+	[switch]$retrain = $false
 )
 
 if ($build -or $b) {
@@ -30,6 +32,9 @@ elseif ($br) {
 }
 elseif ($brs -or $bs) {
     docker build -t deepwell-app . ; if ($?){docker rm -f dwrunning} ; docker run -dit --mount type=bind,source="$(pwd)",target=/app -p 8080:8080 --name dwrunning deepwell-app; if ($?){ Start-Sleep -s 2; Start "http://localhost:8080/"; docker logs -f dwrunning }
+}
+elseif ($rrt -or $retrain){
+	docker rm -f dwrunning ; docker run -it --mount type=bind,source="$(pwd)",target=/app -p 8080:8080 --name dwrunning deepwell-app -2 -2
 }
 else{
     write-output "No accepted flags detected. Choose from -b,-r,-rs,-br or -brs. b=build, r=run, s=show like: .\deepwellstart.ps1 -br"
