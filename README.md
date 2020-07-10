@@ -23,6 +23,7 @@ You can also combine the shortened version of the flags to do more things:
 | -rt | Run with new training |
 | -br | Build + Run |
 | -rs |  Run + Show|
+| -rrt| Run with retraining |
 |-brs|Build + Run + Show |
 
 Show will open the browser and show the plot
