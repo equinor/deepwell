@@ -43,3 +43,4 @@ else { write-output "No accepted flags detected. Choose from -b,-r,-rs,-br or -b
 #The string Textparamforpython is used in in run_dw_env.py to determine what block of code should run. Examples could be train, load or retrain
 
 
+

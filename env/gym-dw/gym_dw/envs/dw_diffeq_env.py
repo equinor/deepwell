@@ -4,7 +4,7 @@ import numpy as np
 import random
 
 
-class DeepWellEnv2(gym.Env):
+class DwDiffeqEnv(gym.Env):
     metadata = {'render.modes': ['console']}
 
     def __init__(self):
@@ -40,8 +40,7 @@ class DeepWellEnv2(gym.Env):
             if velocity == 0:
                 velocity = 1
             self.state[1] = np.array([dx, dz])/velocity  # Normalised velocity
-            self.state[0] += self.state[1] #update pos with updated and normalized vel. vector 
-            self.state[0] += self.state[1] #update pos with updated and normalized vel. vector 
+            self.state[0] += self.state[1] #update pos with updated and normalized vel. vector
         
         new_dist = np.linalg.norm(self.state[0] - self.targetball['center'])
         dist_diff = new_dist - old_dist
@@ -54,9 +53,6 @@ class DeepWellEnv2(gym.Env):
     def get_reward(self, dist_diff):
         # Reward if moved closer to target and penalise if moved further away
         done = False
-        #reward = 0
-       # if dist_diff > 0:
-        #    reward += 1
         reward = - dist_diff
         
         valid = self.valid_state()

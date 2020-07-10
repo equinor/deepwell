@@ -23,36 +23,10 @@ def main():
     model = agent.get_model()
     
     #Test model and get lists of visited coordinates
-    xcoord,ycoord = agent.test_model(model)
-    print("Point: ", agent.xt, agent.yt)
-    print("Target: ",agent.env.xtarget,agent.env.ytarget)
 
-    figure = agent.env.render(xcoord,ycoord) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
-    figure.gca().invert_yaxis()
+    xcoord,ycoord, xt, yt, xhz, yhz = agent.test_model(model)
     
-    
-
-    '''
-    env = gym.make('DeepWellEnv-v0')
-    xcoord = []
-    ycoord = []
-    obs = env.reset()
-    xt = 0
-    yt = 0
-
-    for _ in range(1000):
-        #action = env.action_space.sample()
-        action = 1
-        obs, rewards, done, info = env.step(action)
-        xcoord.append(info['x'])
-        ycoord.append(info['y'])
-        print(rewards)
-    print("Last position: ",xcoord[-1],ycoord[-1])
-    figure = env.render(xcoord,ycoord)
-    figure.gca().invert_yaxis()
-    '''
-
-
+    figure = agent.env.render(xcoord,ycoord, xt, yt, xhz, yhz) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
 
     try:
