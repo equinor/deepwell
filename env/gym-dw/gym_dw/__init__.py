@@ -6,7 +6,7 @@ register(
 )
 
 register(
-    id='DwDiffeqEnv-v0',
-    entry_point='gym_dw.envs:DwDiffeqEnv'
+    id='DeepWellEnv2-v0',
+    entry_point='gym_dw.envs:DeepWellEnv2'
 )
 
