@@ -44,7 +44,7 @@ class DeepWellEnv(gym.Env):
         #Set action and observation space
         self.action_space = spaces.MultiDiscrete([3]*2)
         self.stateLow = np.array([ -self.xmax, -self.ymax,  -1., -1.,-self.xmax, -self.ymax])
-        self.stateHigh = np.array([ self.xmax, self.ymax, 1., 1.,-self.xmax, -self.ymax])
+        self.stateHigh = np.array([ self.xmax, self.ymax, 1., 1.,self.xmax, self.ymax])
         self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh, dtype=np.float64)
 
         #Create figure to send to server
