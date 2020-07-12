@@ -177,6 +177,7 @@ class DeepWellEnv(gym.Env):
             self.ydist_hazard = -self.ymax + 2*random.randint(0,1)*self.ymax
 
         #Calculate minimum and maximum total distance
+        self.max_dist = []
         self.min_tot_dist = 0
         prev_p = np.array([self.x,self.y])
         for i in range(self.numtargets):
