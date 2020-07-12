@@ -121,6 +121,12 @@ class DeepWellEnv(gym.Env):
             reward -= 3000
             done = True
 
+        #Check if maximum travel range has been reached
+        self.dist_traveled += self.stepsize
+        if self.dist_traveled > self.max_dist[self.target_hits]:
+            reward -= 3000
+            done = True
+
         #Check if inside target radius (reward)
         if dist_new < self.targets[self.target_hits]['radius']: #self.radius_target:
             reward += 3000
@@ -132,11 +138,6 @@ class DeepWellEnv(gym.Env):
                 self.xdist1 = self.targets[self.target_hits]['pos'][0]-self.x  #x-axis distance to next target
                 self.ydist1 = self.targets[self.target_hits]['pos'][1]-self.y  #y-axis distance to next target
             
-        #Check if maximum travel range has been reached
-        self.dist_traveled += self.stepsize
-        if self.dist_traveled > self.max_dist[self.target_hits]:
-            reward -= 3000
-            done = True
 
         #Info for plotting and printing in run-file
         info = {'x':self.x, 'y':self.y, 'xtargets': [target['pos'][0] for target in self.targets],
