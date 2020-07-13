@@ -5,7 +5,8 @@ param (
 	[switch]$r = $false,
 	[switch]$br = $false,
 	$Textparamforpython=$args[0],
-	$Numparamforpython=$args[1]
+	$Numparamforpython=$args[1],
+	$Filenameparamforpython=$args[2]
 )
 
 if($Textparamforpython-eq $null) {		#This is to allow ".\deepwellstart.ps1 -r" to be run without any parameters and not cause problems in python
@@ -14,6 +15,10 @@ if($Textparamforpython-eq $null) {		#This is to allow ".\deepwellstart.ps1 -r" t
 
 if($Numparamforpython-eq $null) {		#This is to allow ".\deepwellstart.ps1 -r" to be run without any parameters and not cause problems in python
   $Numparamforpython = 10000			#Default number of timesteps if none is specified
+}
+
+if($Filenameparamforpython-eq $null) {		#This is to allow ".\deepwellstart.ps1 -r" to be run without any parameters and not cause problems in python
+  $Filenameparamforpython = " "		#Default number of timesteps if none is specified
 }	
 
 
@@ -30,17 +35,17 @@ function start-tensorboard-server {
 	docker exec -dit dwrunning tensorboard --logdir /usr/src/app/tensorboard_logs/ --host 0.0.0.0 --port 6006; if ($?) { "Tensorboard server started successfully. Running agent..." } else { "Something went wrong when trying to start tensorboard server" }
 }
 
-function start-python-code($Textparamforpython, $Numparamforpython) {
-	docker exec -it dwrunning python /usr/src/app/main.py $Textparamforpython $Numparamforpython
+function start-python-code($Textparamforpython, $Numparamforpython, $Filenameparamforpython ) {
+	docker exec -it dwrunning python /usr/src/app/main.py $Textparamforpython $Numparamforpython $Filenameparamforpython
 }
 
-function start-whole-container($Textparamforpython, $Numparamforpython) {
-	start-container ; if ($?) { start-tensorboard-server } ; if ($?) { start-python-code $Textparamforpython $Numparamforpython }
+function start-whole-container($Textparamforpython, $Numparamforpython, $Filenameparamforpython) {
+	start-container ; if ($?) { start-tensorboard-server } ; if ($?) { start-python-code $Textparamforpython $Numparamforpython $Filenameparamforpython }
 }
 
 if ( $build -or $b ) { build-container } 
-elseif ( $br ) { build-container ; start-whole-container $Textparamforpython $Numparamforpython }
-elseif ($run -or $r) { start-whole-container $Textparamforpython $Numparamforpython }
+elseif ( $br ) { build-container ; start-whole-container $Textparamforpython $Numparamforpython $Filenameparamforpython }
+elseif ($run -or $r) { start-whole-container $Textparamforpython $Numparamforpython $Filenameparamforpython }
 else { write-output "No accepted flags detected. Choose from -build,-run,-b,-r or -br like: '.\deepwellstart.ps1 -br'. To specify behavior in run_dw_env.py run with parameters like: '.\deepwellstart.ps1 -r train 10000'" }
 
 #The string Textparamforpython is used in in run_dw_env.py to determine what block of code should run. Examples could be train, load or retrain

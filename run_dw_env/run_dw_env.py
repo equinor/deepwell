@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 import sys
 from custom_callback.evalcallback import EvalCallback2
 
+from datetime import datetime
+
+
 # Filter tensorflow version warnings
 import os
 # https://stackoverflow.com/questions/40426502/is-there-a-way-to-suppress-the-messages-tensorflow-prints/40426709
@@ -40,9 +43,10 @@ class run_dw:
     #Get model either by training a new one or loading an old one
     def get_model(self):
         #sys.argv fetches arg when running "deepwellstart.ps1 -r arg". This is to make it possible to load,train or retrain the agent.
-        mainpy_path, text_argument, num_argument = sys.argv[0], sys.argv[1], int(sys.argv[2])
+        mainpy_path, text_argument, num_argument, model_name = sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3]
         #mainpy_path is the path of main.py = '/app/main.py'
-        #If no argument is given (deepwellstart.ps1 -r), argument = " "
+        #If no argument is given (deepwellstart.ps1 -r), text_argument = " "
+        if model_name == " " : model_name = datetime.now().strftime('%d%m%y-%H%M')
 
 
         #Periodically evalute agent, save best model
@@ -51,31 +55,33 @@ class run_dw:
                         deterministic=True, render=False) 
 
 
-        tensorboard_log = "app/tensorboard_logs/"
+        tensorboard_logs_path = "app/tensorboard_logs/"
+        trained_models_path = "app/trained_models/"
 
         if text_argument == "train":
             # Use TRPO or PPO2
             # To train model run script with an argument train
             #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
             print("====================== NOW TRAINING MODEL ==========================")
-            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_log)
-            model.learn(total_timesteps = num_argument, tb_log_name='200k_new')
-            model.save("app/trained_models/ppo2_200k_newenv")
+            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
+            model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
+            model.save(trained_models_path + model_name)
             return model
          
         elif text_argument == "retrain":
             # This is for retraining the model, for tensorboard integration load the tensorboard log from your trained model and create a new name in model.learn below.
             print("====================== NOW RETRAINING MODEL ==========================")
-            model = PPO2.load("/app/ppo2_200k+400k", tensorboard_log="logs/200k_new_1")
+            model = PPO2.load(trained_models_path + model_name, tensorboard_log=tensorboard_logs_path)
             model.set_env(make_vec_env('DeepWellEnv-v0', n_envs=8))
-            model.learn(total_timesteps=num_argument, callback =eval_callback, reset_num_timesteps=False, tb_log_name='PPO2_400_5th')      #Continue training
-            model.save("ppo2_200k+500k")                                                                                            #Save the retrained model
+            model.learn(total_timesteps=int(num_argument), callback=eval_callback, reset_num_timesteps=False, tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))      #Continue training
+            model.save(trained_models_path + model_name)                                                                                                   #Save the retrained model
             return model
                 
         elif text_argument == "load":
             # Load a saved model. Remove "/app/" if not running with docker
             print("====================== NOW LOADING MODEL ==========================")
-            model = PPO2.load("best_model368000", tensorboard_log="logs/best_model368")              
+            model_name = num_argument                                                                    #Use string instead of number
+            model = PPO2.load(trained_models_path + model_name, tensorboard_log=tensorboard_logs_path)              
             return model
 
         else:

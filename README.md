@@ -11,30 +11,41 @@ You only have to do that one time.
 Then you can navigate to the deepwell repository on your computer and build the container by running:
 
     .\deepwellstart.ps1 -build
-Then, to run the container, simply enter:
+Then, to train the agent, simply enter:
 
-    .\deepwellstart.ps1 -run <num timesteps>
+    .\deepwellstart.ps1 -run train <num timesteps> <model nickname>
 
 A handy tip is just to write the first couple of letters "de" and press tab to complete.
 
 You can then see the plot at http://localhost:8080 and the tensorboard result from the training session at http://localhost:7007
+
+The trained models will be saved to the trained_models folder. The logs for tensorboard are saved in the tensorboard_logs folder.
+
+Note: You do not need to specify a nickname for the model. If you omit this, it will simply be called the current date and time like: '130720-1530.zip' 
+
+
 
 ### Examples of how you can use the script:
 Rebuild docker image (needed to load changes in env):
 
     .\deepwellstart.ps1 -b
 
-Train the model with 10000 timesteps:
+Train the model with 10000 timesteps and save it as 'myppo2model':
+
+    .\deepwellstart.ps1 -r train 10000 myppo2model
+
+Train the model with 10000 timesteps and save it with a  current date+time name:
 
     .\deepwellstart.ps1 -r train 10000
   
-Build and retrain the model with 10000 timesteps:
+Retrain the myppo2model model with 10000 timesteps:
 
-    .\deepwellstart.ps1 -br retrain 10000
+    .\deepwellstart.ps1 -r retrain 10000 myppo2model
 
+Load and run model:
 
+    .\deepwellstart.ps1 -r load myppo2model
 
-    .\deepwellstart.ps1 -br retrain 10000
 
 ## Running without script (Non windows)
 
