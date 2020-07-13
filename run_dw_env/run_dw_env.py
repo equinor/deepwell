@@ -102,11 +102,13 @@ class run_dw:
                 hits = info['hits']
                 self.xt = info['xtargets']
                 self.yt = info['ytargets']
+                self.rt = info['t_radius']
                 self.xhz = info['xhazards']
                 self.yhz = info['yhazards']
+                self.rhz = info['h_radius']
                 break
         print("Minimum total distance: ",info['min_dist'])
         print("Distance traveled: ",info['tot_dist'])    
         print("Target hits:     ", hits)
         self.env.close()
-        return self.xcoord, self.ycoord, self.xt, self.yt, self.xhz, self.yhz
+        return self.xcoord, self.ycoord, self.xt, self.yt, self.rt, self.xhz, self.yhz, self.rhz
