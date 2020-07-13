@@ -2,7 +2,7 @@ import gym
 from gym_dw import envs
 #import env.DeepWellEnv
 from stable_baselines import TRPO
-#from stable_baselines.common.policies import MlpPolicy
+from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
 import matplotlib
@@ -24,12 +24,6 @@ tf.autograph.set_verbosity(0)
 import logging
 tf.get_logger().setLevel(logging.ERROR)
 
-
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines.deepq.policies import MlpPolicy
-
-from stable_baselines import HER, DQN, SAC, DDPG, TD3
-from stable_baselines.her import GoalSelectionStrategy, HERGoalEnvWrapper
 
 class run_dw:
     def __init__(self):
@@ -81,8 +75,7 @@ class run_dw:
         elif text_argument == "load":
             # Load a saved model. Remove "/app/" if not running with docker
             print("====================== NOW LOADING MODEL ==========================")
-            model = PPO2.load("/app/ppo2_200k_newenv", tensorboard_log="logs/200k_new_1")              
-            model.save("ppo2_100k+240k")
+            model = PPO2.load("best_model368000", tensorboard_log="logs/best_model368")              
             return model
 
         else:
@@ -107,11 +100,13 @@ class run_dw:
                 hits = info['hits']
                 self.xt = info['xtargets']
                 self.yt = info['ytargets']
+                self.rt = info['t_radius']
                 self.xhz = info['xhazards']
                 self.yhz = info['yhazards']
+                self.rhz = info['h_radius']
                 break
         print("Minimum total distance: ",info['min_dist'])
         print("Distance traveled: ",info['tot_dist'])    
         print("Target hits:     ", hits)
         self.env.close()
-        return self.xcoord, self.ycoord, self.xt, self.yt, self.xhz, self.yhz
+        return self.xcoord, self.ycoord, self.xt, self.yt, self.rt, self.xhz, self.yhz, self.rhz
