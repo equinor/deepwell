@@ -31,8 +31,8 @@ function start-python-code {
 }
 
 function start-whole-container {
-	Param($Textparamforpython)
-	start-container ; if ($?) { start-tensorboard-server } ; if ($?) { start-python-code($Textparamforpython) }
+	Param([string]$Textparamforpython)
+	start-container ; if ($?) { start-tensorboard-server } ; if ($?) { start-python-code($Textparamforpython,$Textparamforpythontwo) }
 }
 
 if ( $build -or $b ) { build-container } 
