@@ -77,8 +77,7 @@ class run_dw:
         elif argument == "load":
             # Load a saved model. Remove "/app/" if not running with docker
             print("====================== NOW LOADING MODEL ==========================")
-            model = PPO2.load("/app/ppo2_200k_newenv", tensorboard_log="logs/200k_new_1")              
-            model.save("ppo2_100k+240k")
+            model = PPO2.load("best_model368000", tensorboard_log="logs/best_model368")              
             return model
 
         else:
