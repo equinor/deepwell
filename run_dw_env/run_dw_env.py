@@ -25,12 +25,6 @@ import logging
 tf.get_logger().setLevel(logging.ERROR)
 
 
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines.deepq.policies import MlpPolicy
-
-from stable_baselines import HER, DQN, SAC, DDPG, TD3
-from stable_baselines.her import GoalSelectionStrategy, HERGoalEnvWrapper
-
 class run_dw:
     def __init__(self):
         self.env = gym.make('DeepWellEnv-v0')
