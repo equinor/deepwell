@@ -44,7 +44,7 @@ class DeepWellEnv(gym.Env):
         #Set action and observation space
         self.action_space = spaces.MultiDiscrete([3]*2)
         self.stateLow = np.array([ -self.xmax, -self.ymax,  -1., -1.,-self.xmax, -self.ymax])
-        self.stateHigh = np.array([ self.xmax, self.ymax, 1., 1.,-self.xmax, -self.ymax])
+        self.stateHigh = np.array([ self.xmax, self.ymax, 1., 1.,self.xmax, self.ymax])
         self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh, dtype=np.float64)
 
         #Create figure to send to server
@@ -121,6 +121,12 @@ class DeepWellEnv(gym.Env):
             reward -= 3000
             done = True
 
+        #Check if maximum travel range has been reached
+        self.dist_traveled += self.stepsize
+        if self.dist_traveled > self.max_dist[self.target_hits]:
+            reward -= 3000
+            done = True
+
         #Check if inside target radius (reward)
         if dist_new < self.targets[self.target_hits]['radius']: #self.radius_target:
             reward += 3000
@@ -132,11 +138,6 @@ class DeepWellEnv(gym.Env):
                 self.xdist1 = self.targets[self.target_hits]['pos'][0]-self.x  #x-axis distance to next target
                 self.ydist1 = self.targets[self.target_hits]['pos'][1]-self.y  #y-axis distance to next target
             
-        #Check if maximum travel range has been reached
-        self.dist_traveled += self.stepsize
-        if self.dist_traveled > self.max_dist[self.target_hits]:
-            reward -= 3000
-            done = True
 
         #Info for plotting and printing in run-file
         info = {'x':self.x, 'y':self.y, 'xtargets': [target['pos'][0] for target in self.targets],
@@ -177,6 +178,7 @@ class DeepWellEnv(gym.Env):
             self.ydist_hazard = -self.ymax + 2*random.randint(0,1)*self.ymax
 
         #Calculate minimum and maximum total distance
+        self.max_dist = []
         self.min_tot_dist = 0
         prev_p = np.array([self.x,self.y])
         for i in range(self.numtargets):
