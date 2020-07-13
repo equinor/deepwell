@@ -46,35 +46,39 @@ class run_dw:
     #Get model either by training a new one or loading an old one
     def get_model(self):
         #sys.argv fetches arg when running "deepwellstart.ps1 -r arg". This is to make it possible to load,train or retrain the agent.
-        mainpy_path, argument = sys.argv[0], sys.argv[1] 
+        mainpy_path, text_argument, num_argument = sys.argv[0], sys.argv[1], int(sys.argv[2])
         #mainpy_path is the path of main.py = '/app/main.py'
         #If no argument is given (deepwellstart.ps1 -r), argument = " "
+
 
         #Periodically evalute agent, save best model
         eval_callback = EvalCallback2(self.env, best_model_save_path='./model_logs/', 
                         log_path='./model_logs/', eval_freq=1000,
                         deterministic=True, render=False) 
 
-        if argument == "train":
+
+        tensorboard_log = "app/tensorboard_logs/"
+
+        if text_argument == "train":
             # Use TRPO or PPO2
             # To train model run script with an argument train
             #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
             print("====================== NOW TRAINING MODEL ==========================")
-            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log="logs/")
-            model.learn(total_timesteps = 200000, tb_log_name='200k_new')
-            model.save("ppo2_200k_newenv")
+            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_log)
+            model.learn(total_timesteps = num_argument, tb_log_name='200k_new')
+            model.save("app/trained_models/ppo2_200k_newenv")
             return model
          
-        elif argument == "retrain":
+        elif text_argument == "retrain":
             # This is for retraining the model, for tensorboard integration load the tensorboard log from your trained model and create a new name in model.learn below.
             print("====================== NOW RETRAINING MODEL ==========================")
             model = PPO2.load("/app/ppo2_200k+400k", tensorboard_log="logs/200k_new_1")
             model.set_env(make_vec_env('DeepWellEnv-v0', n_envs=8))
-            model.learn(total_timesteps=10000, callback =eval_callback, reset_num_timesteps=False, tb_log_name='PPO2_400_5th')      #Continue training
+            model.learn(total_timesteps=num_argument, callback =eval_callback, reset_num_timesteps=False, tb_log_name='PPO2_400_5th')      #Continue training
             model.save("ppo2_200k+500k")                                                                                            #Save the retrained model
             return model
                 
-        elif argument == "load":
+        elif text_argument == "load":
             # Load a saved model. Remove "/app/" if not running with docker
             print("====================== NOW LOADING MODEL ==========================")
             model = PPO2.load("/app/ppo2_200k_newenv", tensorboard_log="logs/200k_new_1")              
@@ -82,7 +86,7 @@ class run_dw:
             return model
 
         else:
-            print("====================== NO ARGUMENT (Just .\deepwellstart.ps1 -r) ==========================")
+            print("====================== NO ARGUMENT OR NO KNOWN ARGUMENT ENTERED ==========================")
             #Code here
 
         

@@ -4,12 +4,17 @@ param (
 	[switch]$b = $false,
 	[switch]$r = $false,
 	[switch]$br = $false,
-	$Textparamforpython=$args[0]
+	$Textparamforpython=$args[0],
+	$Numparamforpython=$args[1]
 )
 
 if($Textparamforpython-eq $null) {		#This is to allow ".\deepwellstart.ps1 -r" to be run without any parameters and not cause problems in python
   $Textparamforpython = " "
 }
+
+if($Numparamforpython-eq $null) {		#This is to allow ".\deepwellstart.ps1 -r" to be run without any parameters and not cause problems in python
+  $Numparamforpython = 10000			#Default number of timesteps if none is specified
+}	
 
 
 function build-container {
@@ -18,27 +23,25 @@ function build-container {
 
 function start-container {
 	docker rm -f dwrunning
-	docker run -dit --mount type=bind,source="$(pwd)",target=/app -p 0.0.0.0:7007:6006 -p 8080:8080 --name dwrunning deepwell-app ; if ($?) { write-output "Initialized deepwell container successfully" } else { write-output "Something went wrong when trying to run (initialize) the container" }
+	docker run -dit --mount type=bind,source="$(pwd)",target=/usr/src/app -p 0.0.0.0:7007:6006 -p 8080:8080 --name dwrunning deepwell-app ; if ($?) { write-output "Initialized deepwell container successfully" } else { write-output "Something went wrong when trying to run (initialize) the container" }
 }
 
 function start-tensorboard-server {
-	docker exec -dit dwrunning tensorboard --logdir /usr/src/app/logs/ --host 0.0.0.0 --port 6006; if ($?) { "Tensorboard server started successfully. Running agent..." } else { "Something went wrong when trying to start tensorboard server" }
+	docker exec -dit dwrunning tensorboard --logdir /usr/src/app/tensorboard_logs/ --host 0.0.0.0 --port 6006; if ($?) { "Tensorboard server started successfully. Running agent..." } else { "Something went wrong when trying to start tensorboard server" }
 }
 
-function start-python-code {
-	Param($Textparamforpython)
-	docker exec -it dwrunning python /app/main.py $Textparamforpython
+function start-python-code($Textparamforpython, $Numparamforpython) {
+	docker exec -it dwrunning python /usr/src/app/main.py $Textparamforpython $Numparamforpython
 }
 
-function start-whole-container {
-	Param([string]$Textparamforpython)
-	start-container ; if ($?) { start-tensorboard-server } ; if ($?) { start-python-code($Textparamforpython,$Textparamforpythontwo) }
+function start-whole-container($Textparamforpython, $Numparamforpython) {
+	start-container ; if ($?) { start-tensorboard-server } ; if ($?) { start-python-code $Textparamforpython $Numparamforpython }
 }
 
 if ( $build -or $b ) { build-container } 
-elseif ( $br ) { build-container ; start-whole-container($Textparamforpython) }
-elseif ($run -or $r) { start-whole-container($Textparamforpython) }
-else { write-output "No accepted flags detected. Choose from -b,-r,-rs,-br or -brs. b=build, r=run, s=show like: .\deepwellstart.ps1 -br" }
+elseif ( $br ) { build-container ; start-whole-container $Textparamforpython $Numparamforpython }
+elseif ($run -or $r) { start-whole-container $Textparamforpython $Numparamforpython }
+else { write-output "No accepted flags detected. Choose from -build,-run,-b,-r or -br like: '.\deepwellstart.ps1 -br'. To specify behavior in run_dw_env.py run with parameters like: '.\deepwellstart.ps1 -r train 10000'" }
 
 #The string Textparamforpython is used in in run_dw_env.py to determine what block of code should run. Examples could be train, load or retrain
 

@@ -3,3 +3,11 @@ __pycache__/
 env/gym-dw/gym_dw.egg-info
 .vscode
 .vscode/
+
+#Exclude content 
+trained_models/*
+tensorboard_logs/*
+
+#Add exceptions for readmes so folders will be recognized
+!tensorboard_logs/README.md
+!trained_models/README.md
