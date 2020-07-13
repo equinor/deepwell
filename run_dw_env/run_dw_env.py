@@ -2,7 +2,7 @@ import gym
 from gym_dw import envs
 #import env.DeepWellEnv
 from stable_baselines import TRPO
-#from stable_baselines.common.policies import MlpPolicy
+from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
 import matplotlib
