@@ -1,6 +1,10 @@
 FROM python:3.7
 
-RUN apt-get update && apt-get install -y libopenmpi-dev
+RUN apt-get update && apt-get install -y \
+  libopenmpi-dev \
+  tzdata
+
+ENV TZ Europe/Oslo				#This is to sync the containers time with Oslo timezone for filenames. Without this it will use UTC.
 
 ENV PROJECT_PATH=/usr/src
 WORKDIR $PROJECT_PATH
