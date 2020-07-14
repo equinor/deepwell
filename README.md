@@ -68,16 +68,16 @@ Then start it with:
 
   
 
-    docker run -dit --mount type=bind,source="$(pwd)",target=/app -p 0.0.0.0:7007:6006 -p 8080:8080 --name dwrunning deepwell-app
+    docker run -dit --mount type=bind,source="$(pwd)",target=/usr/src/app -p 0.0.0.0:7007:6006 -p 8080:8080 --name dwrunning deepwell-app
 
 
 Then start the tensorboard server:
 
-    docker exec -dit dwrunning tensorboard --logdir /usr/src/app/logs/ --host 0.0.0.0 --port 6006
+    docker exec -dit dwrunning tensorboard --logdir /usr/src/app/tensorboard_logs/ --host 0.0.0.0 --port 6006
 
 And lastly, run python with
 
-    docker exec -it dwrunning python /app/main.py <text_arg_for_python> <num_arg_for_python>
+    docker exec -it dwrunning python /usr/src/app/main.py <text_arg_for_python> <num_arg_for_python> <model_name>
 
 For information regarding the paramters, see the "running with script" section above.
 
