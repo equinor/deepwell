@@ -8,29 +8,31 @@ from run_dw_env.run_dw_env import *
 
 #Env names:
 #agent = gym.make('DeepWellEnv-v0')
-#agent = gym.make('DwDiffeqEnv-v0')
+#agent = gym.make('DeepWellEnv2-v0')
 
 def main():
     ###### INSTANTIATE AND TRAIN YOUR AGENT HERE ######
 
     #Remember to move your agent into its own folder (look at the run_dw_env folder), then import it here before commiting and pushing
 
+    
     #Set up environment
     agent = run_dw()
-
+    
     #Train or load model
     model = agent.get_model()
     
     #Test model and get lists of visited coordinates
-    xcoord,ycoord = agent.test_model(model)
-    
-    figure = agent.env.render(xcoord,ycoord) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
 
+    xcoord,ycoord, xt, yt, rt, xhz, yhz, rhz = agent.test_model(model)
+    
+    figure = agent.env.render(xcoord, ycoord, xt, yt, rt, xhz, yhz, rhz) #Enter figure here from agent using agent.fig, agent.get_plot(), agent.close() or agent.render() depending on implementation
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
+
     try:
         figure
-    except:
-        print("Figure for plotting in main.py is not defined or wrong type. \nFix in main.py or ignore if plotting is not relevant.")
+    except NameError:
+        raise TypeError("Figure for plotting in main.py is not defined or wrong type. Fix in main.py or ignore if plotting is not relevant.")
 
     application = MyApplication(figure)
     http_server = tornado.httpserver.HTTPServer(application)
