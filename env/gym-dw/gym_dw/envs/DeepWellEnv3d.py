@@ -45,15 +45,14 @@ class DeepWellEnv(gym.Env):
     def render(self, xcoord, ycoord, zcoord, xt, yt, zt, rt, xhz, yhz, zhz, rhz):
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
+        ax.plot(xcoord,ycoord,zcoord)
         fig.gca().invert_zaxis()
         
-        for i in range(len(xt)): 
-            target = plt.Circle((xt[i], yt[i], zt[i]), rt[i], color='g')
-            ax.add_artist(target)
-            ax.annotate(i+1, (xt[i], yt[i], zt[i]))
+        for i in range(len(xt)):
+            plot_ball(xt[i],yt[i],zt[i],rt[i],'g',ax)
+            
         for i in range(len(xhz)):
-            hazard = plt.Circle((xhz[i], yhz[i]), zhz[i], rhz[i], color='r')
-            ax.add_artist(hazard)
+            plot_ball(xhz[i],yhz[i],zhz[i],rhz[i],'r',ax)
 
         green_circle = Line2D([0], [0], marker='o', color='w', label='Target',
                         markerfacecolor='g', markersize=15)
@@ -62,7 +61,7 @@ class DeepWellEnv(gym.Env):
         ax.legend(handles=[green_circle, red_circle])
 
         ax.set_xlim([self.xmin, self.xmax])
-        ax.set_ylim([self.ymin, self.ymaz])
+        ax.set_ylim([self.ymin, self.ymax])
         ax.set_zlim([self.zmax, self.zmin])
         ax.set_xlabel("East")
         ax.set_ylabel("North")
@@ -191,7 +190,7 @@ class DeepWellEnv(gym.Env):
         self.target_hits = 0
         self.x = random.randint(0, 600)
         self.y = self.ymax/2
-        self.z = 0 # Better to start at surface? self.zmax/2 
+        self.z = 0  
         self.xd = self.xd0
         self.yd = self.yd0
         self.zd = self.zd0
@@ -262,7 +261,7 @@ class DeepWellEnv(gym.Env):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
             x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
-            y = 0  # Set initially to zero so in the plane, change later to make it harder
+            y = self.ymax/2  # Set initially to zero so in the plane, change later to make it harder
             if i == 0:
                 z = random.randint(1000, self.zmax - 200)
             else: 
@@ -288,7 +287,7 @@ class DeepWellEnv(gym.Env):
             valid = False
             while valid == False:
                 x = random.randint(0, self.xmax)
-                y = random.randint(-500, 500)  # Refine this choice later
+                y = self.ymax/2  #y = random.randint(500, 1000)  # Refine this choice later
                 z = random.randint(500, self.zmax)
                 pos = np.array([x, y, z])
 
@@ -308,3 +307,13 @@ class DeepWellEnv(gym.Env):
         self.init_states()
         return self.state
 
+def plot_ball(x0,y0,z0,r,c,ax):
+    
+    # Make data
+    u = np.linspace(0, 2 * np.pi, 100)
+    v = np.linspace(0, np.pi, 100)
+    x = x0 + r * np.outer(np.cos(u), np.sin(v))
+    y = y0 + r * np.outer(np.sin(u), np.sin(v))
+    z = z0 + r * np.outer(np.ones(np.size(u)), np.cos(v))
+    # Plot the surface
+    ax.plot_surface(x, y, z, color=c)
