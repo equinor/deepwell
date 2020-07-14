@@ -50,8 +50,8 @@ class run_dw:
 
 
         #Periodically evalute agent, save best model
-        eval_callback = EvalCallback2(self.env, best_model_save_path='./model_logs/', 
-                        log_path='./model_logs/', eval_freq=1000,
+        eval_callback = EvalCallback2(self.env, best_model_save_path='app/model_logs/', 
+                        log_path='app/model_logs/', eval_freq=1000,
                         deterministic=True, render=False) 
 
 
