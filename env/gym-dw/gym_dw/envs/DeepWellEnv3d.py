@@ -2,6 +2,7 @@ import gym
 from gym import spaces
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 import random
 
@@ -20,8 +21,8 @@ class DeepWellEnv(gym.Env):
         self.zmax = 3000         #(>1000)
 
         self.xd0 = 0.0
-        self.yd0 = 1.0
-        self.zd0 = 0.0
+        self.yd0 = 0.0
+        self.zd0 = 1.0
 
         self.rel_max_dist = 3    #Set when to exit episode (dist_traveled > rel_max_dist*min_tot_dist = max_tot_dist)
         self.numtargets = 5     #==SET NUMBER OF TARGETS==#
@@ -36,22 +37,22 @@ class DeepWellEnv(gym.Env):
         
         #Set action and observation space
         self.action_space = spaces.MultiDiscrete([3]*3)
-        self.stateLow = np.array([ -self.xmax, -self.ymax, -self.zmax, -self.xmax, -self.ymax, -self.zmax -1., -1., -1., -self.xmax, -self.ymax])
+        self.stateLow = np.array([ -self.xmax, -self.ymax, -self.zmax, -self.xmax, -self.ymax, -self.zmax, -1., -1., -1., -self.xmax, -self.ymax, -self.zmax])
         self.stateHigh = np.array([ self.xmax, self.ymax, self.zmax, self.xmax, self.ymax, self.zmax, 1., 1., 1., self.xmax, self.ymax, self.zmax])
         self.observation_space = spaces.Box(low=self.stateLow, high=self.stateHigh, dtype=np.float64)
 
         #Create figure to send to server
-    def render(self, xcoord, ycoord, xt, yt, rt, xhz, yhz, rhz):
-        fig, ax = plt.subplots()
-        ax.plot(xcoord, ycoord)
-        fig.gca().invert_yaxis()
+    def render(self, xcoord, ycoord, zcoord, xt, yt, zt, rt, xhz, yhz, zhz, rhz):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        fig.gca().invert_zaxis()
         
         for i in range(len(xt)): 
-            target = plt.Circle((xt[i], yt[i]), rt[i], color='g')
+            target = plt.Circle((xt[i], yt[i], zt[i]), rt[i], color='g')
             ax.add_artist(target)
-            ax.annotate(i+1, (xt[i], yt[i]))
+            ax.annotate(i+1, (xt[i], yt[i], zt[i]))
         for i in range(len(xhz)):
-            hazard = plt.Circle((xhz[i], yhz[i]), rhz[i], color='r')
+            hazard = plt.Circle((xhz[i], yhz[i]), zhz[i], rhz[i], color='r')
             ax.add_artist(hazard)
 
         green_circle = Line2D([0], [0], marker='o', color='w', label='Target',
@@ -61,9 +62,11 @@ class DeepWellEnv(gym.Env):
         ax.legend(handles=[green_circle, red_circle])
 
         ax.set_xlim([self.xmin, self.xmax])
-        ax.set_ylim([self.ymax, self.ymin])
-        ax.set_xlabel("Horizontal")
-        ax.set_ylabel("Depth")
+        ax.set_ylim([self.ymin, self.ymaz])
+        ax.set_zlim([self.zmax, self.zmin])
+        ax.set_xlabel("East")
+        ax.set_ylabel("North")
+        ax.set_zlabel("TVD")
         return fig
                
     def step(self, action):
@@ -167,10 +170,10 @@ class DeepWellEnv(gym.Env):
                 
 
         #Info for plotting and printing in run-file
-        info = {'x':self.x, 'y':self.y,
+        info = {'x':self.x, 'y':self.y, 'z':self.z,
                 'xtargets': [target['pos'][0] for target in self.targets],
                 'ytargets': [target['pos'][1] for target in self.targets],
-                'ztargets': [target['pos'][2] for target in self.targets]
+                'ztargets': [target['pos'][2] for target in self.targets],
                 't_radius': [target['radius'] for target in self.targets],
                 'hits': self.target_hits, 'tot_dist':self.dist_traveled, 
                 'min_dist':self.min_tot_dist,
@@ -187,27 +190,27 @@ class DeepWellEnv(gym.Env):
         self.dist_traveled = 0
         self.target_hits = 0
         self.x = random.randint(0, 600)
-        self.y = 0
-        self.z = self.zmax/2 
+        self.y = self.ymax/2
+        self.z = 0 # Better to start at surface? self.zmax/2 
         self.xd = self.xd0
         self.yd = self.yd0
         self.zd = self.zd0
         #Initialize target(s)
         self.targets = self.init_targets()
         self.hazards = self.init_hazards()
-        self.xdist1 = self.x-self.targets[0]['pos'][0]
-        self.ydist1 = self.y-self.targets[0]['pos'][1]
-        self.zdist1 = self.z-self.targets[0]['pos'][2]
+        self.xdist1 = self.x - self.targets[0]['pos'][0]
+        self.ydist1 = self.y - self.targets[0]['pos'][1]
+        self.zdist1 = self.z - self.targets[0]['pos'][2]
 
         if self.numtargets > 1:
-            self.xdist2 = self.x-self.targets[1]['pos'][0]
-            self.ydist2 = self.y-self.targets[1]['pos'][1]
-            self.zdist2 = self.y-self.targets[1]['pos'][2]
+            self.xdist2 = self.x - self.targets[1]['pos'][0]
+            self.ydist2 = self.y - self.targets[1]['pos'][1]
+            self.zdist2 = self.y - self.targets[1]['pos'][2]
 
 
         #Set distances to closest hazard
         if self.numhazards > 0:
-            diff = [(np.array(hazard['pos'])-[self.x,self.y,self.z]) for hazard in self.hazards]
+            diff = [(np.array(hazard['pos']) - [self.x,self.y,self.z]) for hazard in self.hazards]
             diffnorms = [np.linalg.norm([element[0], element[1], element[2]]) for element in diff]
             closest_hz = np.argmin(diffnorms)
             self.xdist_hazard = diff[closest_hz][0]
@@ -234,7 +237,7 @@ class DeepWellEnv(gym.Env):
             self.zdist1,
             self.xdist2,
             self.ydist2,
-            self.zdist2
+            self.zdist2,
             self.xd,
             self.yd,
             self.zd,
@@ -252,21 +255,22 @@ class DeepWellEnv(gym.Env):
         """
         # Separate targets in to equally spaced bins to avoid overlap
         xsep = (self.xmax - self.xmin - 2*200)/self.numtargets
-        maxy_change = (self.ymax - 200 - 1000)/2
+        maxz_change = (self.zmax - 200 - 1000)/2
 
         targets = [None]*(self.numtargets)
         for i in range(self.numtargets):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
             x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
+            y = 0  # Set initially to zero so in the plane, change later to make it harder
             if i == 0:
-                y = random.randint(1000, self.ymax - 200)
+                z = random.randint(1000, self.zmax - 200)
             else: 
                 # y drawn randomly within its allowed values, with limit to ychange from previous target
-                y = random.randint(np.clip(y-maxy_change, 1000, self.ymax-200),
-                                     np.clip(y+maxy_change, 1000, self.ymax-200))
+                z = random.randint(np.clip(z-maxz_change, 1000, self.zmax-200),
+                                     np.clip(z+maxz_change, 1000, self.zmax-200))
             
-            targets[i] = ({'pos': np.array([x ,y]), 
+            targets[i] = ({'pos': np.array([x, y, z]), 
                                  'radius': radius,
                                  'order':i})
         return targets
@@ -284,13 +288,14 @@ class DeepWellEnv(gym.Env):
             valid = False
             while valid == False:
                 x = random.randint(0, self.xmax)
-                y = random.randint(500, self.ymax)
-                pos = np.array([x, y])
+                y = random.randint(-500, 500)  # Refine this choice later
+                z = random.randint(500, self.zmax)
+                pos = np.array([x, y, z])
 
                 # Check if hazard is overlapping with targets (*10% of sum of radii)
-                for x in range(self.numtargets):
-                    relpos = np.linalg.norm(pos - self.targets[x]['pos'])
-                    if relpos > (self.targets[x]['radius'] + radius)*1.1:
+                for j in range(self.numtargets):
+                    relpos = np.linalg.norm(pos - self.targets[j]['pos'])
+                    if relpos > (self.targets[j]['radius'] + radius)*1.1:
                         valid = True
                     else: 
                         valid = False
