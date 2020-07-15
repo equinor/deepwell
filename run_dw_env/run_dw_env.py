@@ -11,6 +11,7 @@ import sys
 from custom_callback.evalcallback import EvalCallback2
 
 from datetime import datetime
+from custom_policies.policies import ThreeOf128NonShared,  OneShared55TwoValueOnePolicy
 
 
 # Filter tensorflow version warnings
@@ -30,14 +31,17 @@ tf.get_logger().setLevel(logging.ERROR)
 
 class run_dw:
     def __init__(self):
-        self.env = gym.make('DeepWellEnv-v2')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0'
+        self.env = gym.make('DeepWellEnv3d-v0')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0'
         self.xcoord = []
         self.ycoord = []
+        self.zcoord = []
         self.obs = self.env.reset()
         self.xt = []
         self.yt = []
+        self.zt = []
         self.xhz = []
         self.yhz = []
+        self.zhz = []
 
    
     #Get model either by training a new one or loading an old one
@@ -54,6 +58,8 @@ class run_dw:
                         log_path='app/model_logs/', eval_freq=1000,
                         deterministic=True, render=False) 
 
+        #To use custom policy with different layer setup than MlpPolicy([64,64])
+        custom_policy = ThreeOf128NonShared
 
         tensorboard_logs_path = "app/tensorboard_logs/"
         trained_models_path = "app/trained_models/"
@@ -63,7 +69,7 @@ class run_dw:
             # To train model run script with an argument train
             #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
             print("====================== NOW TRAINING MODEL ==========================")
-            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
+            model = PPO2(policy='MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
             model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
             model.save(trained_models_path + model_name)
             return model
@@ -102,17 +108,20 @@ class run_dw:
             print("reward: ",rewards) 
             self.xcoord.append(info['x'])
             self.ycoord.append(info['y'])
+            self.zcoord.append(info['z'])
             if done:
                 hits = info['hits']
                 self.xt = info['xtargets']
                 self.yt = info['ytargets']
+                self.zt = info['ztargets']
                 self.rt = info['t_radius']
                 self.xhz = info['xhazards']
                 self.yhz = info['yhazards']
+                self.zhz = info['zhazards']
                 self.rhz = info['h_radius']
                 break
         print("Minimum total distance: ",info['min_dist'])
         print("Distance traveled: ",info['tot_dist'])    
         print("Target hits:     ", hits)
         self.env.close()
-        return self.xcoord, self.ycoord, self.xt, self.yt, self.rt, self.xhz, self.yhz, self.rhz
+        return self.xcoord, self.ycoord, self.zcoord, self.xt, self.yt, self.zt, self.rt, self.xhz, self.yhz, self.zhz, self.rhz
