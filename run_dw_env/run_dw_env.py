@@ -30,14 +30,17 @@ tf.get_logger().setLevel(logging.ERROR)
 
 class run_dw:
     def __init__(self):
-        self.env = gym.make('DeepWellEnv-v2')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0'
+        self.env = gym.make('DeepWellEnv3d-v0')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0'
         self.xcoord = []
         self.ycoord = []
+        self.zcoord = []
         self.obs = self.env.reset()
         self.xt = []
         self.yt = []
+        self.zt = []
         self.xhz = []
         self.yhz = []
+        self.zhz = []
 
    
     #Get model either by training a new one or loading an old one
@@ -102,17 +105,20 @@ class run_dw:
             print("reward: ",rewards) 
             self.xcoord.append(info['x'])
             self.ycoord.append(info['y'])
+            self.zcoord.append(info['z'])
             if done:
                 hits = info['hits']
                 self.xt = info['xtargets']
                 self.yt = info['ytargets']
+                self.zt = info['ztargets']
                 self.rt = info['t_radius']
                 self.xhz = info['xhazards']
                 self.yhz = info['yhazards']
+                self.zhz = info['zhazards']
                 self.rhz = info['h_radius']
                 break
         print("Minimum total distance: ",info['min_dist'])
         print("Distance traveled: ",info['tot_dist'])    
         print("Target hits:     ", hits)
         self.env.close()
-        return self.xcoord, self.ycoord, self.xt, self.yt, self.rt, self.xhz, self.yhz, self.rhz
+        return self.xcoord, self.ycoord, self.zcoord, self.xt, self.yt, self.zt, self.rt, self.xhz, self.yhz, self.zhz, self.rhz
