@@ -6,7 +6,7 @@ from matplotlib.lines import Line2D
 import random
 
 
-class DeepWellEnv(gym.Env):
+class DeepWellEnvV2(gym.Env):
     
     def __init__(self):
         super().__init__()

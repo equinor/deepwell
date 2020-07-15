@@ -7,7 +7,7 @@ from matplotlib.lines import Line2D
 import random
 
 
-class DeepWellEnv(gym.Env):
+class DeepWellEnv3D(gym.Env):
     
     def __init__(self):
         super().__init__()
@@ -110,12 +110,15 @@ class DeepWellEnv(gym.Env):
         self.state[6] = self.xd
         self.state[7] = self.yd
         self.state[8] = self.zd
-        
+
         #Check new target distance (reward)
         dist_new = np.linalg.norm([self.xdist1,self.ydist1, self.zdist1])  
         dist_diff = dist_new - dist
         reward = -dist_diff
 
+        #Action reward
+        if acc[0] == acc[1] ==acc[2] == 0:
+            reward +=5
         #Check new hazard distance (reward)
         if self.numhazards > 0:
             diff = [(np.array(hazard['pos'])-[self.x,self.y,self.z]) for hazard in self.hazards]
@@ -169,7 +172,8 @@ class DeepWellEnv(gym.Env):
                 
 
         #Info for plotting and printing in run-file
-        info = {'x':self.x, 'y':self.y, 'z':self.z,
+        if done == True:
+            info = {'x':self.x, 'y':self.y, 'z':self.z,
                 'xtargets': [target['pos'][0] for target in self.targets],
                 'ytargets': [target['pos'][1] for target in self.targets],
                 'ztargets': [target['pos'][2] for target in self.targets],
@@ -180,7 +184,8 @@ class DeepWellEnv(gym.Env):
                 'yhazards': [hazard['pos'][1] for hazard in self.hazards],
                 'zhazards': [hazard['pos'][2] for hazard in self.hazards],
                 'h_radius': [hazard['radius'] for hazard in self.hazards]}
-
+        else: 
+            info = {'x':self.x, 'y':self.y, 'z':self.z}
         return self.state, reward, done, info
 
 
@@ -261,7 +266,7 @@ class DeepWellEnv(gym.Env):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
             x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
-            y = self.ymax/2  # Set initially to zero so in the plane, change later to make it harder
+            y = random.randint(self.ymax/2-250, self.ymax/2+250)
             if i == 0:
                 z = random.randint(1000, self.zmax - 200)
             else: 
@@ -287,7 +292,7 @@ class DeepWellEnv(gym.Env):
             valid = False
             while valid == False:
                 x = random.randint(0, self.xmax)
-                y = self.ymax/2  #y = random.randint(500, 1000)  # Refine this choice later
+                y = random.randint(self.ymax/2-250, self.ymax/2+250)  # Refine this choice later
                 z = random.randint(500, self.zmax)
                 pos = np.array([x, y, z])
 

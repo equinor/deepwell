@@ -30,7 +30,7 @@ tf.get_logger().setLevel(logging.ERROR)
 
 class run_dw:
     def __init__(self):
-        self.env = gym.make('DeepWellEnv-v0')
+        self.env = gym.make('DeepWellEnv-v2')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0'
         self.xcoord = []
         self.ycoord = []
         self.obs = self.env.reset()
