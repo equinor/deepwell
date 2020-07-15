@@ -11,6 +11,7 @@ import sys
 from custom_callback.evalcallback import EvalCallback2
 
 from datetime import datetime
+from custom_policies.policies import ThreeOf128NonShared,  OneShared55TwoValueOnePolicy
 
 
 # Filter tensorflow version warnings
@@ -57,6 +58,8 @@ class run_dw:
                         log_path='app/model_logs/', eval_freq=1000,
                         deterministic=True, render=False) 
 
+        #To use custom policy with different layer setup than MlpPolicy([64,64])
+        custom_policy = ThreeOf128NonShared
 
         tensorboard_logs_path = "app/tensorboard_logs/"
         trained_models_path = "app/trained_models/"
@@ -66,7 +69,7 @@ class run_dw:
             # To train model run script with an argument train
             #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
             print("====================== NOW TRAINING MODEL ==========================")
-            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
+            model = PPO2(policy='MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
             model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
             model.save(trained_models_path + model_name)
             return model
