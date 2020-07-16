@@ -32,7 +32,7 @@ class DeepWellEnvSpher(gym.Env):
         self.min_radius = 50
         self.max_radius = 50
        
-        self.numhazards = 8     #==SET NUMBER OF HAZARDS==# 
+        self.numhazards = 2     #==SET NUMBER OF HAZARDS==# 
         self.min_radius_hazard = 100
         self.max_radius_hazard = 100    
 
@@ -52,15 +52,15 @@ class DeepWellEnvSpher(gym.Env):
             8:[incr, incr],}        
         self.action_space = spaces.Discrete(9)
 
-        state_high = np.array([self.xmax, self.ymax, self.zmax,  # xdist1, ydist1, zdist1,
+        state_high = np.array([self.xmax, self.ymax, self.zmax,   # xdist1, ydist1, zdist1,
                                 self.xmax, self.ymax, self.zmax,  # xdist2, ydist2, zdist2,
                                 self.xmax, self.ymax, self.zmax,  # xdist_hazard, ydist_hazard, zdist_hazard,
-                                2*np.pi, 2*np.pi,                       # vertical_ang, horizontal_ang,
+                                2*np.pi, 2*np.pi,                 # vertical_ang, horizontal_ang,
                                 MAX_ANGVEL, MAX_ANGVEL,           # vertical_ang_vel, horizontal_ang_vel,
                                 MAX_ANGACC, MAX_ANGACC])          # vertical_ang_acc, horizontal_ang_acc
         state_low = -state_high.copy()
         state_low[9], state_low[10] = 0, 0
-        self.observation_space = spaces.Box(low=-state_low, high=state_high, dtype=np.float64)
+        self.observation_space = spaces.Box(low=state_low, high=state_high, dtype=np.float64)
 
 
     def init_states(self):
@@ -69,11 +69,11 @@ class DeepWellEnvSpher(gym.Env):
         self.target_hits = 0
         self.x = random.randint(0, 600)
         self.y = self.ymax/2
-        self.z = 0 # Better to start at surface? self.zmax/2 
+        self.z = 0 
 
         # Spherical coordinates
-        self.horizontal_ang = random.uniform(np.pi/10, np.pi/2-np.pi/10)  # change later?
-        self.vertical_ang = 0    # starting vertically down      # uniform(np.pi/10,np.pi/2)
+        self.horizontal_ang = 0  # random.uniform(np.pi/10, np.pi/2-np.pi/10)  # change later?
+        self.vertical_ang = 0    # starting vertically down
 
         self.horizontal_angVel = 0
         self.vertical_angVel = 0
@@ -158,7 +158,6 @@ class DeepWellEnvSpher(gym.Env):
         if abs(self.horizontal_angAcc + self.actions_dict[action][1]) < MAX_ANGACC:
             self.horizontal_angAcc += self.actions_dict[action][1]
         
-
         # Update angular velocity
         if abs(self.vertical_angVel + self.vertical_angAcc) < MAX_ANGVEL:
             self.vertical_angVel += self.vertical_angAcc
@@ -167,8 +166,8 @@ class DeepWellEnvSpher(gym.Env):
             self.horizontal_angVel += self.horizontal_angAcc
         
         # Update angle
-        self.vertical_ang = (self.vertical_ang + self.vertical_angVel) % (2 * np.pi)
-        self.horizontal_ang = (self.horizontal_ang + self.horizontal_angVel) % (2 * np.pi)
+        self.vertical_ang = (self.vertical_ang + self.vertical_angVel) % (2*np.pi)
+        self.horizontal_ang = (self.horizontal_ang + self.horizontal_angVel) % (2*np.pi)
 
         # update position
         self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
