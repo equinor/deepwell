@@ -55,11 +55,10 @@ class DeepWellEnvSpher(gym.Env):
         state_high = np.array([self.xmax, self.ymax, self.zmax,   # xdist1, ydist1, zdist1,
                                 self.xmax, self.ymax, self.zmax,  # xdist2, ydist2, zdist2,
                                 self.xmax, self.ymax, self.zmax,  # xdist_hazard, ydist_hazard, zdist_hazard,
-                                2*np.pi, 2*np.pi,                 # vertical_ang, horizontal_ang,
+                                np.pi, np.pi,                     # vertical_ang, horizontal_ang,
                                 MAX_ANGVEL, MAX_ANGVEL,           # vertical_ang_vel, horizontal_ang_vel,
                                 MAX_ANGACC, MAX_ANGACC])          # vertical_ang_acc, horizontal_ang_acc
         state_low = -state_high.copy()
-        state_low[9], state_low[10] = 0, 0
         self.observation_space = spaces.Box(low=state_low, high=state_high, dtype=np.float64)
 
 
@@ -255,6 +254,7 @@ class DeepWellEnvSpher(gym.Env):
                     self.zdist2 = self.zdist1
 
         return reward, done
+
 
     def get_info(self, done):
         #Info for plotting and printing in run-file
