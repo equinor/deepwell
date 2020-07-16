@@ -6,11 +6,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 import random
 
-MAX_ANGVEL = 0.1
-MAX_ANGACC = 0.05
+MAX_ANGVEL = 0.05
+MAX_ANGACC = 0.01
 
 # The allowed increment. We either add or remove this value to the angular acceleration
-ANGACC_INCREMENT = 0.01
+ANGACC_INCREMENT = 0.001
 STEP_LENGTH = 30.0
 
 
@@ -55,10 +55,11 @@ class DeepWellEnvSpher(gym.Env):
         state_high = np.array([self.xmax, self.ymax, self.zmax,   # xdist1, ydist1, zdist1,
                                 self.xmax, self.ymax, self.zmax,  # xdist2, ydist2, zdist2,
                                 self.xmax, self.ymax, self.zmax,  # xdist_hazard, ydist_hazard, zdist_hazard,
-                                np.pi, np.pi,                     # vertical_ang, horizontal_ang,
+                                np.pi, 2*np.pi,                   # vertical_ang, horizontal_ang,
                                 MAX_ANGVEL, MAX_ANGVEL,           # vertical_ang_vel, horizontal_ang_vel,
                                 MAX_ANGACC, MAX_ANGACC])          # vertical_ang_acc, horizontal_ang_acc
         state_low = -state_high.copy()
+        state_low[9], state_low[10] = 0, 0
         self.observation_space = spaces.Box(low=state_low, high=state_high, dtype=np.float64)
 
 
@@ -66,7 +67,7 @@ class DeepWellEnvSpher(gym.Env):
         #Set starting drill position and velocity
         self.dist_traveled = 0
         self.target_hits = 0
-        self.x = random.randint(0, 600)
+        self.x = random.randint(200, 600)
         self.y = self.ymax/2
         self.z = 0 
 
@@ -151,17 +152,17 @@ class DeepWellEnvSpher(gym.Env):
     def update_pos(self, action):
         
         # update angular acceleration
-        if abs(self.vertical_angAcc + self.actions_dict[action][0]) < MAX_ANGACC:
+        if abs(self.vertical_angAcc + self.actions_dict[action][0]) <= MAX_ANGACC:
             self.vertical_angAcc += self.actions_dict[action][0]
         
-        if abs(self.horizontal_angAcc + self.actions_dict[action][1]) < MAX_ANGACC:
+        if abs(self.horizontal_angAcc + self.actions_dict[action][1]) <= MAX_ANGACC:
             self.horizontal_angAcc += self.actions_dict[action][1]
         
         # Update angular velocity
-        if abs(self.vertical_angVel + self.vertical_angAcc) < MAX_ANGVEL:
+        if abs(self.vertical_angVel + self.vertical_angAcc) <= MAX_ANGVEL:
             self.vertical_angVel += self.vertical_angAcc
         
-        if abs(self.horizontal_angVel + self.horizontal_angAcc) < MAX_ANGVEL:
+        if abs(self.horizontal_angVel + self.horizontal_angAcc) <= MAX_ANGVEL:
             self.horizontal_angVel += self.horizontal_angAcc
         
         # Update angle
@@ -195,15 +196,18 @@ class DeepWellEnvSpher(gym.Env):
         dist_diff = dist_new - self.old_dist
         reward = -dist_diff
 
-        #Action reward
-        #if acc[0] == acc[1] ==acc[2] == 0:
-        #    reward +=5
-        #Check new hazard distance (reward)
+        if abs(self.vertical_angAcc) >= MAX_ANGACC:
+            reward -= 100
+        if abs(self.horizontal_angAcc) >= MAX_ANGACC:
+            reward -= 100
 
-        if self.vertical_angAcc > MAX_ANGACC:
-            reward -= 500
-        if self.horizontal_angAcc > MAX_ANGACC:
-            reward -= 500
+        if abs(self.vertical_angVel) >= MAX_ANGVEL:
+            reward -= 100
+        if abs(self.horizontal_angVel) >= MAX_ANGVEL:
+            reward -= 100
+
+        if self.vertical_angVel == 0 and self.horizontal_angVel == 0:
+            reward +=100
         
         if self.numhazards > 0:
             diff = [(np.array(hazard['pos'])-[self.x,self.y,self.z]) for hazard in self.hazards]
