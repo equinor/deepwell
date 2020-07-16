@@ -72,7 +72,7 @@ class DeepWellEnvSpher(gym.Env):
         self.z = 0 # Better to start at surface? self.zmax/2 
 
         # Spherical coordinates
-        self.horizontal_ang = 0 # random.uniform(0, np.pi/2)  # change later?
+        self.horizontal_ang = random.uniform(np.pi/10, np.pi/2-np.pi/10)  # change later?
         self.vertical_ang = 0    # starting vertically down      # uniform(np.pi/10,np.pi/2)
 
         self.horizontal_angVel = 0
@@ -166,19 +166,14 @@ class DeepWellEnvSpher(gym.Env):
         if abs(self.horizontal_angVel + self.horizontal_angAcc) < MAX_ANGVEL:
             self.horizontal_angVel += self.horizontal_angAcc
         
-
         # Update angle
         self.vertical_ang = (self.vertical_ang + self.vertical_angVel) % (2 * np.pi)
         self.horizontal_ang = (self.horizontal_ang + self.horizontal_angVel) % (2 * np.pi)
 
-        #print('before', self.x, self.y, self.z)
-        #print("Vertical ", self.vertical_ang, "horizontal ", self.horizontal_ang)
         # update position
         self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
         self.y += STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
         self.z += STEP_LENGTH * np.cos(self.vertical_ang)
-        #print('after', self.x, self.y, self.z)
-
 
     def calc_dist_to_target(self):
         #Calculate and update distance to target(s)
@@ -385,7 +380,7 @@ if __name__ == '__main__' :
     env = DeepWellEnvSpher()
     env.reset()
     for _ in range(10):
-        action = 7 #env.action_space.sample()
+        action = 0 #env.action_space.sample()
         print(env.actions_dict[action])
         print("Step: ", _ , " this is what the current state is:")
         print(env.step(action))
