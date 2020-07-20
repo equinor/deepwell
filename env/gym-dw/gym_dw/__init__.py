@@ -18,5 +18,3 @@ register(
     id='DeepWellEnvSpher-v0',
     entry_point='gym_dw.envs:DeepWellEnvSpher'
 )
-
-
