@@ -88,10 +88,7 @@ class ppo2:
 
     def get_fig(self,model):
         xcoord_list, ycoord_list, zcoord_list, info = self.get_path_from_model(model)
-
-        for i in range(len(xcoord_list)):
-            print(xcoord_list[i], ycoord_list[i],zcoord_list[i])        
-
+        
         fig = go.Figure(data=[go.Scatter3d(x=xcoord_list, y=ycoord_list, z=zcoord_list, mode='lines', name="Well path", line=dict(width=10.0))])
 
         fig.update_layout(
@@ -125,7 +122,7 @@ class ppo2:
             action, _states = model.predict(obs)
             obs, rewards, done, info = self.env.step(action)
             
-            #print("reward: ",rewards) 
+            print("reward: ",rewards) 
             xcoord_list.append(info['x'])
             ycoord_list.append(info['y'])
             zcoord_list.append(info['z'])
