@@ -60,8 +60,8 @@ class ppo2:
             #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
             print("====================== NOW TRAINING MODEL ==========================")
             model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
-            #model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
-            #model.save(trained_models_path + model_name)
+            model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
+            model.save(trained_models_path + model_name)
             return model
          
         elif text_argument == "retrain":
@@ -88,6 +88,9 @@ class ppo2:
 
     def get_fig(self,model):
         xcoord_list, ycoord_list, zcoord_list, info = self.get_path_from_model(model)
+
+        for i in range(len(xcoord_list)):
+            print(xcoord_list[i], ycoord_list[i],zcoord_list[i])        
 
         fig = go.Figure(data=[go.Scatter3d(x=xcoord_list, y=ycoord_list, z=zcoord_list, mode='lines', name="Well path", line=dict(width=10.0))])
 
@@ -122,7 +125,7 @@ class ppo2:
             action, _states = model.predict(obs)
             obs, rewards, done, info = self.env.step(action)
             
-            print("reward: ",rewards) 
+            #print("reward: ",rewards) 
             xcoord_list.append(info['x'])
             ycoord_list.append(info['y'])
             zcoord_list.append(info['z'])

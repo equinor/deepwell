@@ -195,18 +195,18 @@ class DeepWellEnvSpher(gym.Env):
         self.horizontal_target_ang2 = np.arctan2(self.ydist2,self.xdist2)
 
     def calc_rel_target_ang(self):
-        self.rel_vertical_target_ang1 = calc_angle_diff(self.vertical_ang, self.vertical_target_ang1)
-        self.rel_horizontal_target_ang1 = calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang1)
-        self.rel_vertical_target_ang2 = calc_angle_diff(self.vertical_ang, self.vertical_target_ang2)
-        self.rel_horizontal_target_ang2 = calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang2)
+        self.rel_vertical_target_ang1 = self.calc_angle_diff(self.vertical_ang, self.vertical_target_ang1)
+        self.rel_horizontal_target_ang1 = self.calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang1)
+        self.rel_vertical_target_ang2 = self.calc_angle_diff(self.vertical_ang, self.vertical_target_ang2)
+        self.rel_horizontal_target_ang2 = self.calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang2)
     
     def calc_hazard_ang(self):
         self.vertical_hazard_ang = np.arctan2(np.sqrt(self.xdist_hazard**2 + self.ydist_hazard**2),self.zdist_hazard)
         self.horizontal_hazard_ang = np.arctan2(self.ydist_hazard,self.xdist_hazard)
 
     def calc_rel_hazard_ang(self):
-        self.rel_vertical_hazard_ang = calc_angle_diff(self.vertical_ang, self.vertical_hazard_ang)
-        self.rel_horizontal_hazard_ang = calc_angle_diff(self.horizontal_ang, self.horizontal_hazard_ang)
+        self.rel_vertical_hazard_ang = self.calc_angle_diff(self.vertical_ang, self.vertical_hazard_ang)
+        self.rel_horizontal_hazard_ang = self.calc_angle_diff(self.horizontal_ang, self.horizontal_hazard_ang)
 
     def calc_hazard_distances(self):
         diff = [(np.array(hazard['pos'])-[self.x,self.y,self.z]) for hazard in self.hazards]
@@ -358,14 +358,19 @@ class DeepWellEnvSpher(gym.Env):
                         break
             hazards[i] = ({'pos': pos, 'radius': radius})
         return hazards
+    
+    def reset(self):
+        self.init_states()
+        return self.state
 
-def calc_angle_diff(ang1, ang2):
-    diff = ang2 - ang1
-    if diff < -np.pi:
-        diff = diff + 2*np.pi
-    if diff > np.pi:
-        diff = diff - 2*np.pi
-    return diff
+
+    def calc_angle_diff(self, ang1, ang2):
+        diff = ang2 - ang1
+        if diff < -np.pi:
+            diff = diff + 2*np.pi
+        if diff > np.pi:
+            diff = diff - 2*np.pi
+        return diff
 
 
 if __name__ == '__main__' :

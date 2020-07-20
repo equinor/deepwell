@@ -1,4 +1,3 @@
-
 from plothandler import Plotter                           #Import the server that plots the result in browser
 from agents.ppo2 import ppo2
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
@@ -30,7 +29,6 @@ def main():
         raise TypeError("Figure for plotting in main.py is not defined or wrong type. Fix in main.py or ignore if plotting is not relevant.")
 
     Plotter().show3d(figure, port=8080)         #Here you can specify at which port the plot should appear NOTE: Only 8080 is open in the docker-conainer
-
 
 if __name__ == "__main__":
     main()
