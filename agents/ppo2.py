@@ -1,18 +1,19 @@
 import gym
 from gym_dw import envs
-#import env.DeepWellEnv
+
 from stable_baselines import TRPO
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common import make_vec_env
 from stable_baselines import PPO2
-import matplotlib
-import matplotlib.pyplot as plt
+
 import sys
 from custom_callback.evalcallback import EvalCallback2
 
 from datetime import datetime
 from custom_policies.policies import ThreeOf128NonShared,  OneShared55TwoValueOnePolicy
 
+import numpy as np
+import plotly.graph_objects as go # or plotly.express as px
 
 # Filter tensorflow version warnings
 import os
@@ -29,20 +30,9 @@ import logging
 tf.get_logger().setLevel(logging.ERROR)
 
 
-class run_dw:
+class ppo2:
     def __init__(self):
-        self.env = gym.make('DeepWellEnv3d-v0')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0'
-        self.xcoord = []
-        self.ycoord = []
-        self.zcoord = []
-        self.obs = self.env.reset()
-        self.xt = []
-        self.yt = []
-        self.zt = []
-        self.xhz = []
-        self.yhz = []
-        self.zhz = []
-
+        self.env = gym.make('DeepWellEnvSpher-v0')     #Options: 'DeepWellEnv-v0' 'DeepWellEnv-v2' 'DeepWellEnv3d-v0' 'DeepWellEnvSpher-v0'
    
     #Get model either by training a new one or loading an old one
     def get_model(self):
@@ -69,9 +59,9 @@ class run_dw:
             # To train model run script with an argument train
             #model = TRPO(MlpPolicy, self.env, verbose=1, tensorboard_log='logs/')
             print("====================== NOW TRAINING MODEL ==========================")
-            model = PPO2(policy='MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
-            model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
-            model.save(trained_models_path + model_name)
+            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
+            #model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
+            #model.save(trained_models_path + model_name)
             return model
          
         elif text_argument == "retrain":
@@ -94,34 +84,68 @@ class run_dw:
             print("====================== NO ARGUMENT OR NO KNOWN ARGUMENT ENTERED ==========================")
             #Code here
 
-        
+
+
+    def get_fig(self,model):
+        xcoord_list, ycoord_list, zcoord_list, info = self.get_path_from_model(model)
+
+        fig = go.Figure(data=[go.Scatter3d(x=xcoord_list, y=ycoord_list, z=zcoord_list, mode='lines', name="Well path", line=dict(width=10.0))])
+
+        fig.update_layout(
+            scene = dict(
+                xaxis = dict(nticks=4, range=[self.env.xmin,self.env.xmax],title_text="East",),
+                yaxis = dict(nticks=4, range=[self.env.ymin,self.env.ymax],title_text="North",),
+                zaxis = dict(nticks=4, range=[self.env.zmax,self.env.zmin],title_text="TVD",),
+            ),
+        )
+
+        self.plot_balls(fig,"Target",'green', info['xtargets'], info['ytargets'], info['ztargets'], info['t_radius'])       #Pass the lists of target/harzard x,y,z to the plot_balls method
+        self.plot_balls(fig,"Hazard",'red', info['xhazards'], info['yhazards'], info['zhazards'], info['h_radius'])
+
+
+        print("Minimum total distance: ", info['min_dist'])
+        print("Distance traveled: ", info['tot_dist'])    
+        print("Target hits:     ", info['hits'])
+        return fig
+
+
 
     #Test the trained model, run until done, return list of visited coords
-    def test_model(self,model):
-        self.obs = self.env.reset()
-        while True:
-            action, _states = model.predict(self.obs)
-            self.obs, rewards, done, info = self.env.step(action)
+    def get_path_from_model(self,model):
+        obs = self.env.reset()
+        xcoord_list = [self.env.x]      #Initialize list of path coordinates with initial position
+        ycoord_list = [self.env.y]
+        zcoord_list = [self.env.z]
+        info = {}
 
-            """ print(self.obs)
-            print(info)"""
+        while True:
+            action, _states = model.predict(obs)
+            obs, rewards, done, info = self.env.step(action)
+            
             print("reward: ",rewards) 
-            self.xcoord.append(info['x'])
-            self.ycoord.append(info['y'])
-            self.zcoord.append(info['z'])
-            if done:
-                hits = info['hits']
-                self.xt = info['xtargets']
-                self.yt = info['ytargets']
-                self.zt = info['ztargets']
-                self.rt = info['t_radius']
-                self.xhz = info['xhazards']
-                self.yhz = info['yhazards']
-                self.zhz = info['zhazards']
-                self.rhz = info['h_radius']
-                break
-        print("Minimum total distance: ",info['min_dist'])
-        print("Distance traveled: ",info['tot_dist'])    
-        print("Target hits:     ", hits)
-        self.env.close()
-        return self.xcoord, self.ycoord, self.zcoord, self.xt, self.yt, self.zt, self.rt, self.xhz, self.yhz, self.zhz, self.rhz
+            xcoord_list.append(info['x'])
+            ycoord_list.append(info['y'])
+            zcoord_list.append(info['z'])
+            
+            if done: break
+
+        return xcoord_list, zcoord_list, zcoord_list, info
+  
+
+    
+    def plot_balls(self, figure, name, color, x_list, y_list, z_list, diameter):
+        color_list = [color]*len(x_list)        #Color needs a list of colors for each point
+
+        figure.add_trace(go.Scatter3d(
+        x = x_list,
+        y = y_list,
+        z = z_list,
+        name=name,
+        mode = 'markers',
+        marker = dict(
+            sizemode = 'diameter',
+            sizeref = 3,                #The diameter gets divided by this number. Tweak this to scale the points. Info on sizeref: https://plotly.com/python/reference/#scatter-marker-sizeref
+            size = diameter,
+            color = color_list,
+            )
+        ))

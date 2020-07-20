@@ -28,7 +28,7 @@ function build-container {
 
 function start-container {
 	docker rm -f dwrunning
-	docker run -dit --mount type=bind,source="$(pwd)",target=/usr/src/app -p 0.0.0.0:7007:6006 -p 8080:8080 --name dwrunning deepwell-app ; if ($?) { write-output "Initialized deepwell container successfully" } else { write-output "Something went wrong when trying to run (initialize) the container" }
+	docker run -dit --mount type=bind,source="$(pwd)",target=/usr/src/app -p 0.0.0.0:7007:6006 -p 0.0.0.0:8080:8080 --name dwrunning deepwell-app ; if ($?) { write-output "Initialized deepwell container successfully" } else { write-output "Something went wrong when trying to run (initialize) the container" }
 }
 
 function start-tensorboard-server {

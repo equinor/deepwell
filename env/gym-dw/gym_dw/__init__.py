@@ -14,3 +14,9 @@ register(
     entry_point='gym_dw.envs:DeepWellEnv3D'
 )
 
+register(
+    id='DeepWellEnvSpher-v0',
+    entry_point='gym_dw.envs:DeepWellEnvSpher'
+)
+
+

@@ -1,9 +1,6 @@
 import gym
 from gym import spaces
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.lines import Line2D
 import random
 
 MAX_ANGVEL = 0.1
@@ -76,7 +73,7 @@ class DeepWellEnvSpher(gym.Env):
         self.z = 0 # Better to start at surface? self.zmax/2 
 
         # Spherical coordinates
-        self.horizontal_ang = random.uniform(0, np.pi/2)  # change later?
+        self.horizontal_ang = 0  # change later?
         self.vertical_ang = 0    # starting vertically down      # uniform(np.pi/10,np.pi/2)
 
         self.horizontal_angVel = 0
@@ -148,7 +145,7 @@ class DeepWellEnvSpher(gym.Env):
         reward, done = self.get_reward()
 
         state = self.get_state()
-        info = self.get_info(done)
+        info = self.get_info(True)
 
         return state, reward, done, info
 
@@ -177,9 +174,9 @@ class DeepWellEnvSpher(gym.Env):
 
         #print('before', self.x, self.y, self.z)
         # update position
-        self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.vertical_ang)
+        self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
         self.y += STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
-        self.z += STEP_LENGTH * np.cos(self.horizontal_ang)
+        self.z += STEP_LENGTH * np.cos(self.vertical_ang)
         #print('after', self.x, self.y, self.z)
 
 
@@ -273,7 +270,8 @@ class DeepWellEnvSpher(gym.Env):
                 'ytargets': [target['pos'][1] for target in self.targets],
                 'ztargets': [target['pos'][2] for target in self.targets],
                 't_radius': [target['radius'] for target in self.targets],
-                'hits': self.target_hits, 'tot_dist':self.dist_traveled, 
+                'hits': self.target_hits,
+                'tot_dist':self.dist_traveled, 
                 'min_dist':self.min_tot_dist,
                 'xhazards': [hazard['pos'][0] for hazard in self.hazards],
                 'yhazards': [hazard['pos'][1] for hazard in self.hazards],
@@ -341,47 +339,10 @@ class DeepWellEnvSpher(gym.Env):
         return hazards
 
 
-    def render(self, xcoord, ycoord, zcoord, xt, yt, zt, rt, xhz, yhz, zhz, rhz):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.plot(xcoord,ycoord,zcoord)
-        fig.gca().invert_zaxis()
-        
-        for i in range(len(xt)):
-            plot_ball(xt[i],yt[i],zt[i],rt[i],'g',ax)
-            
-        for i in range(len(xhz)):
-            plot_ball(xhz[i],yhz[i],zhz[i],rhz[i],'r',ax)
-
-        # Create circles for label
-        green_circle = Line2D([0], [0], marker='o', color='w', label='Target',
-                        markerfacecolor='g', markersize=15)
-        red_circle = Line2D([0], [0], marker='o', color='w', label='Hazard',
-                        markerfacecolor='r', markersize=15)
-        ax.legend(handles=[green_circle, red_circle])
-
-        ax.set_xlim([self.xmin, self.xmax])
-        ax.set_ylim([self.ymin, self.ymax])
-        ax.set_zlim([self.zmax, self.zmin])
-        ax.set_xlabel("East")
-        ax.set_ylabel("North")
-        ax.set_zlabel("TVD")
-        return fig
-
     def reset(self):
         self.init_states()
         return self.state
 
-
-def plot_ball(x0, y0, z0, r, c, ax):
-        # Make data
-        u = np.linspace(0, 2 * np.pi, 100)
-        v = np.linspace(0, np.pi, 100)
-        x = x0 + r * np.outer(np.cos(u), np.sin(v))
-        y = y0 + r * np.outer(np.sin(u), np.sin(v))
-        z = z0 + r * np.outer(np.ones(np.size(u)), np.cos(v))
-        # Plot the surface
-        ax.plot_surface(x, y, z, color=c)
 
 
 if __name__ == '__main__' :
