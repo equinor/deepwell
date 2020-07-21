@@ -129,7 +129,7 @@ class ppo2:
             
             if done: break
 
-        return xcoord_list, zcoord_list, zcoord_list, info
+        return xcoord_list, ycoord_list, zcoord_list, info
   
 
     
