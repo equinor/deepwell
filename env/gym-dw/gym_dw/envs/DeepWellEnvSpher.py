@@ -7,8 +7,8 @@ MAX_ANGVEL = 0.05
 MAX_ANGACC = 0.01
 
 # The allowed increment. We either add or remove this value to the angular acceleration
-ANGACC_INCREMENT = 0.001
-STEP_LENGTH = 30.0
+ANGACC_INCREMENT = 0.005
+STEP_LENGTH = 10.0
 
 
 class DeepWellEnvSpher(gym.Env):
@@ -31,7 +31,10 @@ class DeepWellEnvSpher(gym.Env):
        
         self.numhazards = 2     #==SET NUMBER OF HAZARDS==# 
         self.min_radius_hazard = 100
-        self.max_radius_hazard = 100    
+        self.max_radius_hazard = 100
+
+        self.deltaY_target = 250
+        self.maxdeltaZ_target = 500
 
         self.state = self.init_states()
         
@@ -80,11 +83,6 @@ class DeepWellEnvSpher(gym.Env):
 
         self.horizontal_angAcc = 0
         self.vertical_angAcc = 0
-
-        #Set starting drill velocity
-        self.xd = STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
-        self.yd = STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
-        self.zd = STEP_LENGTH * np.cos(self.vertical_ang)
 
         #Initialize targets and hazards
         self.targets = self.init_targets()
@@ -164,13 +162,10 @@ class DeepWellEnvSpher(gym.Env):
 
         self.horizontal_ang = (self.horizontal_ang + self.horizontal_angVel) % (2*np.pi)
 
-        # update position and velocity
-        self.xd = STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
-        self.yd = STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
-        self.zd = STEP_LENGTH * np.cos(self.vertical_ang)
-        self.x += self.xd
-        self.y += self.yd
-        self.z += self.zd
+        # update position
+        self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
+        self.y += STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
+        self.z += STEP_LENGTH * np.cos(self.vertical_ang)
 
     def calc_dist_to_target(self):
         #Calculate and update distance to target(s)
@@ -311,14 +306,15 @@ class DeepWellEnvSpher(gym.Env):
         """
         # Separate targets in to equally spaced bins to avoid overlap
         xsep = (self.xmax - self.xmin - 2*200)/self.numtargets
-        maxz_change = (self.zmax - 200 - 1000)/2
+        maxz_change = self.maxdeltaZ_target  # (self.zmax - 200 - 1000)/2
+        deltaY = self.deltaY_target
 
         targets = [None]*(self.numtargets)
         for i in range(self.numtargets):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
             x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
-            y = random.randint(self.ymax/2-250, self.ymax/2+250)
+            y = random.randint(self.ymax/2 - deltaY, self.ymax/2 + deltaY)
             if i == 0:
                 z = random.randint(1000, self.zmax - 200)
             else: 

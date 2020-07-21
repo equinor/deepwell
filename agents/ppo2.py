@@ -63,6 +63,25 @@ class ppo2:
             model.learn(total_timesteps = int(num_argument), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
             model.save(trained_models_path + model_name)
             return model
+
+        elif text_argument == "leveltrain":
+            levels = 5
+            # Initiate model
+            print("====================== Initiating environment ==========================")
+            self.env = gym.make('DeepWellEnvSpherlevel1-v0')
+            model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
+            model.save(trained_models_path + model_name)
+
+            # Train model for increasingly difficult levels
+            for i in range(1, levels+1):
+                if i == 1:
+                    timesteps = float(num_argument)/(8*levels)  # Divide by 8 as num env = 8
+                else: 
+                    timesteps = float(num_argument)/(levels)    # When loading it trains the inputed number of timesteps
+                model = self.retrain('DeepWellEnvSpherlevel'+str(i)+'-v0',
+                                    trained_models_path, model_name, tensorboard_logs_path, timesteps)
+                print("====================== Level " + str(i) + "finished ==========================")
+            return model
          
         elif text_argument == "retrain":
             # This is for retraining the model, for tensorboard integration load the tensorboard log from your trained model and create a new name in model.learn below.
@@ -84,6 +103,16 @@ class ppo2:
             print("====================== NO ARGUMENT OR NO KNOWN ARGUMENT ENTERED ==========================")
             #Code here
 
+
+    def retrain(self, env, trained_models_path, model_name, tensorboard_logs_path, timesteps):
+        # This is for retraining the model, for tensorboard integration load the tensorboard log from your trained model and create a new name in model.learn below.
+        print("====================== NOW RETRAINING MODEL ==========================")
+        self.env = gym.make(env) # For testing model after training
+        model = PPO2.load(trained_models_path + model_name, tensorboard_log=tensorboard_logs_path)
+        model.set_env(make_vec_env(env, n_envs=8))
+        model.learn(total_timesteps=int(timesteps), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))      #Continue training
+        model.save(trained_models_path + model_name)                                                                                                   #Save the retrained model
+        return model
 
 
     def get_fig(self,model):
@@ -127,7 +156,7 @@ class ppo2:
 
 
     #Test the trained model, run until done, return list of visited coords
-    def get_path_from_model(self,model):
+    def get_path_from_model(self, model):
         obs = self.env.reset()
         xcoord_list = [self.env.x]      #Initialize list of path coordinates with initial position
         ycoord_list = [self.env.y]
