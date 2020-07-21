@@ -102,7 +102,6 @@ class ppo2:
         self.plot_balls(fig,"Target",'green', info['xtargets'], info['ytargets'], info['ztargets'], info['t_radius'])       #Pass the lists of target/harzard x,y,z to the plot_balls method
         self.plot_balls(fig,"Hazard",'red', info['xhazards'], info['yhazards'], info['zhazards'], info['h_radius'])
 
-
         print("Minimum total distance: ", info['min_dist'])
         print("Distance traveled: ", info['tot_dist'])    
         print("Target hits:     ", info['hits'])
@@ -133,7 +132,7 @@ class ppo2:
   
 
     
-    def plot_balls(self, figure, name, color, x_list, y_list, z_list, diameter):
+    def plot_balls(self, figure, name, color, x_list, y_list, z_list, radius_list):
         color_list = [color]*len(x_list)        #Color needs a list of colors for each point
 
         figure.add_trace(go.Scatter3d(
@@ -144,8 +143,8 @@ class ppo2:
         mode = 'markers',
         marker = dict(
             sizemode = 'diameter',
-            sizeref = 3,                #The diameter gets divided by this number. Tweak this to scale the points. Info on sizeref: https://plotly.com/python/reference/#scatter-marker-sizeref
-            size = diameter,
+            sizeref = 2.3,                #The radius gets scaled by this number. Lower = larger points. Info on sizeref: https://plotly.com/python/reference/#scatter-marker-sizeref
+            size = radius_list,
             color = color_list,
             )
         ))
