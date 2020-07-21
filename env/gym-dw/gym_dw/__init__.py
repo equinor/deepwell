@@ -18,3 +18,29 @@ register(
     id='DeepWellEnvSpher-v0',
     entry_point='gym_dw.envs:DeepWellEnvSpher'
 )
+
+# Register different levels of DeepWellEnvSpher for level training
+register(
+    id='DeepWellEnvSpherlevel1-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level1'
+)
+
+register(
+    id='DeepWellEnvSpherlevel2-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level2'
+)
+
+register(
+    id='DeepWellEnvSpherlevel3-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level3'
+)
+
+register(
+    id='DeepWellEnvSpherlevel4-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level4'
+)
+
+register(
+    id='DeepWellEnvSpherlevel5-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level5'
+)
