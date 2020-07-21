@@ -70,13 +70,16 @@ class ppo2:
             print("====================== Initiating environment ==========================")
             self.env = gym.make('DeepWellEnvSpherlevel1-v0')
             model = PPO2('MlpPolicy', self.env, verbose=1, tensorboard_log=tensorboard_logs_path)
-            model.learn(total_timesteps = int(1000), tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))
             model.save(trained_models_path + model_name)
 
             # Train model for increasingly difficult levels
             for i in range(1, levels+1):
+                if i == 1:
+                    timesteps = float(num_argument)/(8*levels)  # Divide by 8 as num env = 8
+                else: 
+                    timesteps = float(num_argument)/(levels)    # When loading it trains the inputed number of timesteps
                 model = self.retrain('DeepWellEnvSpherlevel'+str(i)+'-v0',
-                                    trained_models_path, model_name, tensorboard_logs_path, float(num_argument)/levels)
+                                    trained_models_path, model_name, tensorboard_logs_path, timesteps)
                 print("====================== Level " + str(i) + "finished ==========================")
             return model
          
