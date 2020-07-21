@@ -91,6 +91,26 @@ class ppo2:
         
         fig = go.Figure(data=[go.Scatter3d(x=xcoord_list, y=ycoord_list, z=zcoord_list, mode='lines', name="Well path", line=dict(width=10.0))])
 
+
+        x_targets = info['xtargets']
+        y_targets = info['ytargets']
+        z_targets = info['ztargets']
+        radius_targets = info['t_radius']
+
+        x_hazards = info['xhazards']
+        y_hazards = info['yhazards']
+        z_hazards = info['zhazards']
+        radius_hazards = info['h_radius']
+
+
+
+        for i in range(len(x_targets)):
+            self.plot_ball(fig, "Target", 'greens', x_targets[i], y_targets[i], z_targets[i], radius_targets[i])
+        
+        for i in range(len(x_hazards)):
+            self.plot_ball(fig, "Hazard", 'reds', x_hazards[i], y_hazards[i], z_hazards[i], radius_hazards[i])
+
+
         fig.update_layout(
             scene = dict(
                 xaxis = dict(nticks=4, range=[self.env.xmin,self.env.xmax],title_text="East",),
@@ -98,9 +118,6 @@ class ppo2:
                 zaxis = dict(nticks=4, range=[self.env.zmax,self.env.zmin],title_text="TVD",),
             ),
         )
-
-        self.plot_balls(fig,"Target",'green', info['xtargets'], info['ytargets'], info['ztargets'], info['t_radius'])       #Pass the lists of target/harzard x,y,z to the plot_balls method
-        self.plot_balls(fig,"Hazard",'red', info['xhazards'], info['yhazards'], info['zhazards'], info['h_radius'])
 
         print("Minimum total distance: ", info['min_dist'])
         print("Distance traveled: ", info['tot_dist'])    
@@ -131,20 +148,17 @@ class ppo2:
         return xcoord_list, ycoord_list, zcoord_list, info
   
 
-    
-    def plot_balls(self, figure, name, color, x_list, y_list, z_list, radius_list):
-        color_list = [color]*len(x_list)        #Color needs a list of colors for each point
 
-        figure.add_trace(go.Scatter3d(
-        x = x_list,
-        y = y_list,
-        z = z_list,
-        name=name,
-        mode = 'markers',
-        marker = dict(
-            sizemode = 'diameter',
-            sizeref = 2.3,                #The radius gets scaled by this number. Lower = larger points. Info on sizeref: https://plotly.com/python/reference/#scatter-marker-sizeref
-            size = radius_list,
-            color = color_list,
-            )
-        ))
+    def plot_ball(self, figure, name, color, x0, y0, z0, radius):
+            # Make data
+            u = np.linspace(0, 2 * np.pi, 100)
+            v = np.linspace(0, np.pi, 100)
+
+            x = x0 + radius * np.outer(np.cos(u), np.sin(v))
+            y = y0 + radius * np.outer(np.sin(u), np.sin(v))
+            z = z0 + radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+            # Plot the surface
+            figure.add_trace(
+                go.Surface(x=x, y=y, z=z, colorscale=color, showscale=False, name=name),)        
+        
