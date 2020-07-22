@@ -44,8 +44,8 @@ class Level4(DeepWellEnvSpher):
         self.deltaY_target = 200
         self.maxdeltaZ_target = 500
         self.numhazards = 0
-        self.min_radius = 50
-        self.max_radius = 50
+        self.min_radius = 100
+        self.max_radius = 100
         self.reset()
 
 
@@ -56,8 +56,8 @@ class Level5(DeepWellEnvSpher):
         self.deltaY_target = 200
         self.maxdeltaZ_target = 500
         self.numhazards = 2
-        self.min_radius = 50
-        self.max_radius = 50
+        self.min_radius = 100
+        self.max_radius = 100
         self.reset()
 
 
