@@ -250,9 +250,8 @@ class DeepWellEnvSpher(gym.Env):
             if self.hazard_dist < 2*hazard_radius:
                 rel_safe_dist = 2*(hazard_radius - self.hazard_dist)/(hazard_radius) # 0 if dist_hazard = 2*radius_hazard, 1 if dist_hazard = radius_hazard
                 reward -= 50*rel_safe_dist**2
-
-        #Check if outside grid (reward)
-        if (self.x<self.xmin) or (self.y<self.ymin) or (self.z<self.zmin)or (self.x>self.xmax) or (self.y>self.ymax) or (self.z>self.zmax):
+        
+        if self.outside_bounds():
             reward -= 3000
             done = True
 
@@ -307,6 +306,12 @@ class DeepWellEnvSpher(gym.Env):
             self.max_dist.append(self.rel_max_dist*self.min_tot_dist)      
         max_tot_dist = self.rel_max_dist*self.min_tot_dist
         return max_tot_dist
+
+    def outside_bounds(self):
+        x = (self.x < self.xmin) or (self.x > self.xmax)
+        y = (self.y < self.ymin) or (self.y > self.ymax)
+        z = (self.z < self.zmin) or (self.z > self.zmax)
+        return x and y and z
 
     def get_info(self, done):
         #Info for plotting and printing in run-file
