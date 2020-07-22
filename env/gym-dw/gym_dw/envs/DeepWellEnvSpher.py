@@ -210,7 +210,7 @@ class DeepWellEnvSpher(gym.Env):
         self.rel_horizontal_hazard_ang = self.calc_angle_diff(self.horizontal_ang, self.horizontal_hazard_ang)
 
     def calc_hazard_distances(self):
-        diff = [(np.array(hazard['pos'])-[self.x,self.y,self.z]) for hazard in self.hazards]
+        diff = [(np.array(hazard['pos']) - self.get_pos()) for hazard in self.hazards]
         diffnorms = [np.linalg.norm([element[0], element[1], element[2]]) for element in diff]
         closest_hz = np.argmin(diffnorms)
         self.xdist_hazard = diff[closest_hz][0]
@@ -221,7 +221,7 @@ class DeepWellEnvSpher(gym.Env):
     def calc_max_tot_dist(self):
         self.max_dist = []
         self.min_tot_dist = 0
-        prev_p = np.array([self.x,self.y, self.z])
+        prev_p = self.get_pos()
         for i in range(self.numtargets):
             self.min_tot_dist += np.linalg.norm([self.targets[i]['pos'][0]
             -prev_p[0],self.targets[i]['pos'][1]-prev_p[1], self.targets[i]['pos'][2]-prev_p[2]])
