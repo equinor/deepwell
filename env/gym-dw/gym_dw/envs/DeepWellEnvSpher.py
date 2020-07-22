@@ -1,17 +1,14 @@
 import gym
 from gym import spaces
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.lines import Line2D
 import random
 
 MAX_ANGVEL = 0.05
 MAX_ANGACC = 0.01
 
 # The allowed increment. We either add or remove this value to the angular acceleration
-ANGACC_INCREMENT = 0.001
-STEP_LENGTH = 30.0
+ANGACC_INCREMENT = 0.005
+STEP_LENGTH = 10.0
 
 
 class DeepWellEnvSpher(gym.Env):
@@ -34,7 +31,10 @@ class DeepWellEnvSpher(gym.Env):
        
         self.numhazards = 2     #==SET NUMBER OF HAZARDS==# 
         self.min_radius_hazard = 100
-        self.max_radius_hazard = 100    
+        self.max_radius_hazard = 100
+
+        self.deltaY_target = 250
+        self.maxdeltaZ_target = 500
 
         self.state = self.init_states()
         
@@ -83,11 +83,6 @@ class DeepWellEnvSpher(gym.Env):
 
         self.horizontal_angAcc = 0
         self.vertical_angAcc = 0
-
-        #Set starting drill velocity
-        self.xd = STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
-        self.yd = STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
-        self.zd = STEP_LENGTH * np.cos(self.vertical_ang)
 
         #Initialize targets and hazards
         self.targets = self.init_targets()
@@ -167,13 +162,10 @@ class DeepWellEnvSpher(gym.Env):
 
         self.horizontal_ang = (self.horizontal_ang + self.horizontal_angVel) % (2*np.pi)
 
-        # update position and velocity
-        self.xd = STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
-        self.yd = STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
-        self.zd = STEP_LENGTH * np.cos(self.vertical_ang)
-        self.x += self.xd
-        self.y += self.yd
-        self.z += self.zd
+        # update position
+        self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
+        self.y += STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
+        self.z += STEP_LENGTH * np.cos(self.vertical_ang)
 
     def calc_dist_to_target(self):
         #Calculate and update distance to target(s)
@@ -198,18 +190,18 @@ class DeepWellEnvSpher(gym.Env):
         self.horizontal_target_ang2 = np.arctan2(self.ydist2,self.xdist2)
 
     def calc_rel_target_ang(self):
-        self.rel_vertical_target_ang1 = calc_angle_diff(self.vertical_ang, self.vertical_target_ang1)
-        self.rel_horizontal_target_ang1 = calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang1)
-        self.rel_vertical_target_ang2 = calc_angle_diff(self.vertical_ang, self.vertical_target_ang2)
-        self.rel_horizontal_target_ang2 = calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang2)
+        self.rel_vertical_target_ang1 = self.calc_angle_diff(self.vertical_ang, self.vertical_target_ang1)
+        self.rel_horizontal_target_ang1 = self.calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang1)
+        self.rel_vertical_target_ang2 = self.calc_angle_diff(self.vertical_ang, self.vertical_target_ang2)
+        self.rel_horizontal_target_ang2 = self.calc_angle_diff(self.horizontal_ang, self.horizontal_target_ang2)
     
     def calc_hazard_ang(self):
         self.vertical_hazard_ang = np.arctan2(np.sqrt(self.xdist_hazard**2 + self.ydist_hazard**2),self.zdist_hazard)
         self.horizontal_hazard_ang = np.arctan2(self.ydist_hazard,self.xdist_hazard)
 
     def calc_rel_hazard_ang(self):
-        self.rel_vertical_hazard_ang = calc_angle_diff(self.vertical_ang, self.vertical_hazard_ang)
-        self.rel_horizontal_hazard_ang = calc_angle_diff(self.horizontal_ang, self.horizontal_hazard_ang)
+        self.rel_vertical_hazard_ang = self.calc_angle_diff(self.vertical_ang, self.vertical_hazard_ang)
+        self.rel_horizontal_hazard_ang = self.calc_angle_diff(self.horizontal_ang, self.horizontal_hazard_ang)
 
     def calc_hazard_distances(self):
         diff = [(np.array(hazard['pos'])-[self.x,self.y,self.z]) for hazard in self.hazards]
@@ -314,14 +306,15 @@ class DeepWellEnvSpher(gym.Env):
         """
         # Separate targets in to equally spaced bins to avoid overlap
         xsep = (self.xmax - self.xmin - 2*200)/self.numtargets
-        maxz_change = (self.zmax - 200 - 1000)/2
+        maxz_change = self.maxdeltaZ_target  # (self.zmax - 200 - 1000)/2
+        deltaY = self.deltaY_target
 
         targets = [None]*(self.numtargets)
         for i in range(self.numtargets):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
             x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
-            y = random.randint(self.ymax/2-250, self.ymax/2+250)
+            y = random.randint(self.ymax/2 - deltaY, self.ymax/2 + deltaY)
             if i == 0:
                 z = random.randint(1000, self.zmax - 200)
             else: 
@@ -361,57 +354,19 @@ class DeepWellEnvSpher(gym.Env):
                         break
             hazards[i] = ({'pos': pos, 'radius': radius})
         return hazards
-
-
-    def render(self, xcoord, ycoord, zcoord, xt, yt, zt, rt, xhz, yhz, zhz, rhz):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.plot(xcoord,ycoord,zcoord)
-        fig.gca().invert_zaxis()
-        
-        for i in range(len(xt)):
-            plot_ball(xt[i],yt[i],zt[i],rt[i],'g',ax)
-            
-        for i in range(len(xhz)):
-            plot_ball(xhz[i],yhz[i],zhz[i],rhz[i],'r',ax)
-
-        # Create circles for label
-        green_circle = Line2D([0], [0], marker='o', color='w', label='Target',
-                        markerfacecolor='g', markersize=15)
-        red_circle = Line2D([0], [0], marker='o', color='w', label='Hazard',
-                        markerfacecolor='r', markersize=15)
-        ax.legend(handles=[green_circle, red_circle])
-
-        ax.set_xlim([self.xmin, self.xmax])
-        ax.set_ylim([self.ymin, self.ymax])
-        ax.set_zlim([self.zmax, self.zmin])
-        ax.set_xlabel("East")
-        ax.set_ylabel("North")
-        ax.set_zlabel("TVD")
-        return fig
-
+    
     def reset(self):
         self.init_states()
         return self.state
 
 
-def plot_ball(x0, y0, z0, r, c, ax):
-        # Make data
-        u = np.linspace(0, 2 * np.pi, 100)
-        v = np.linspace(0, np.pi, 100)
-        x = x0 + r * np.outer(np.cos(u), np.sin(v))
-        y = y0 + r * np.outer(np.sin(u), np.sin(v))
-        z = z0 + r * np.outer(np.ones(np.size(u)), np.cos(v))
-        # Plot the surface
-        ax.plot_surface(x, y, z, color=c)
-
-def calc_angle_diff(ang1, ang2):
-    diff = ang2 - ang1
-    if diff < -np.pi:
-        diff = diff + 2*np.pi
-    if diff > np.pi:
-        diff = diff - 2*np.pi
-    return diff
+    def calc_angle_diff(self, ang1, ang2):
+        diff = ang2 - ang1
+        if diff < -np.pi:
+            diff = diff + 2*np.pi
+        if diff > np.pi:
+            diff = diff - 2*np.pi
+        return diff
 
 
 if __name__ == '__main__' :
