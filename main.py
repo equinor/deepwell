@@ -1,9 +1,10 @@
-from plothandler import Plotter                           #Import the server that plots the result in browser
+from plot_server import PlotServer                           #Import the server that plots the result in browser
 from agents.ppo2 import ppo2
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
 
-#import gym
-#from gym_dw import envs
+import gym
+from gym_dw import envs
+from stable_baselines import PPO2
 
 #Env names:
 #agent = gym.make('DeepWellEnv-v0')
@@ -13,22 +14,15 @@ def main():
     ###### INSTANTIATE AND TRAIN YOUR AGENT HERE ######
 
     #Remember to put your agents in the agents folder, you can use ppo2.py as a template
-    
-    #Set up environment
-    agent = ppo2()
 
-    #Train or load model
+    #Set up environment
+    env = gym.make('DeepWellEnvSpher-v0')
+    agent = ppo2(env)
     model = agent.get_model()
 
-    figure = agent.get_fig(model)
-
     ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
-    try:
-        figure
-    except NameError:
-        raise TypeError("Figure for plotting in main.py is not defined or wrong type. Fix in main.py or ignore if plotting is not relevant.")
+    PlotServer().show_model_3d(env, model)         #The server needs a model and an env to generate a wellpath and plot it
 
-    Plotter().show3d(figure, port=8080)         #Here you can specify at which port the plot should appear NOTE: Only 8080 is open in the docker-conainer
 
 if __name__ == "__main__":
     main()
