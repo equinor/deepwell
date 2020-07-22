@@ -109,7 +109,7 @@ class DeepWellEnvSpher(gym.Env):
                                     ])
         self.vert_haz_rel_ang, self.hori_haz_rel_ang = calc_rel_ang(self.hazard,
                                     self.vertical_ang, self.horizontal_ang)
-        self.max_dist = self.calc_max_tot_dist()
+        self.max_dist, self.min_tot_dist = self.calc_max_tot_dist()
 
         state = self.get_state()
         return state
@@ -251,7 +251,7 @@ class DeepWellEnvSpher(gym.Env):
             min_tot_dist += np.linalg.norm(self.targets[i]['pos'] - prev_p)
             max_dist[i] = self.rel_max_dist*min_tot_dist 
             prev_p = np.array(self.targets[i]['pos'])
-        return max_dist
+        return max_dist, min_tot_dist
 
     def outside_bounds(self):
         x = (self.x < self.xmin) or (self.x > self.xmax)
