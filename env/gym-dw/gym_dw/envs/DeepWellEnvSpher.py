@@ -103,9 +103,9 @@ class DeepWellEnvSpher(gym.Env):
             self.hazard_dist = np.linalg.norm(self.hazard)
         else:
             self.hazard = np.array([
-                                    np.random.choice(-1, 1)*self.xmax,
-                                    np.random.choice(-1, 1)*self.ymax,
-                                    np.random.choice(-1, 1)*self.ymax
+                                    np.random.choice([-1, 1])*self.xmax,
+                                    np.random.choice([-1, 1])*self.ymax,
+                                    np.random.choice([-1, 1])*self.ymax
                                     ])
         self.vert_haz_rel_ang, self.hori_haz_rel_ang = calc_rel_ang(self.hazard,
                                     self.vertical_ang, self.horizontal_ang)
