@@ -26,8 +26,8 @@ class DeepWellEnvSpher(gym.Env):
 
         self.rel_max_dist = 3    #Set when to exit episode (dist_traveled > rel_max_dist*min_tot_dist = max_tot_dist)
         self.numtargets = 5     #==SET NUMBER OF TARGETS==#
-        self.min_radius = 50
-        self.max_radius = 50
+        self.min_radius = 100
+        self.max_radius = 100
        
         self.numhazards = 2     #==SET NUMBER OF HAZARDS==# 
         self.min_radius_hazard = 100
@@ -54,15 +54,12 @@ class DeepWellEnvSpher(gym.Env):
 
 
         state_high = np.array([MAX_ANGACC, MAX_ANGACC,        # vertical_ang_acc, horizontal_ang_acc,
-                            MAX_ANGVEL, MAX_ANGVEL,            # vertical_ang_vel, horizontal_ang_vel,
-                            np.pi, np.pi #(self.xmax**2+self.ymax**2+self.zmax**2)**(1./2.),       #rel_vertical_target_ang1, rel_horizontal_target_ang1, target_dist1
-                           #np.pi, np.pi, (self.xmax**2+self.ymax**2+self.zmax**2)**(1./2.),       #rel_vertical_target_ang2, rel_horizontal_target_ang2, target_dist2
-                           #np.pi, np.pi, (self.xmax**2+self.ymax**2+self.zmax**2)**(1./2.)       #rel_vertical_hazard_ang, rel_horizontal_hazard_ang, hazard_dist
-                        ])
-    
-
+                               MAX_ANGVEL, MAX_ANGVEL,            # vertical_ang_vel, horizontal_ang_vel,
+                               np.pi, np.pi, np.sqrt(self.xmax**2 + self.ymax**2 + self.zmax**2),       #rel_vertical_target_ang1, rel_horizontal_target_ang1, target_dist1
+                               np.pi, np.pi, np.sqrt(self.xmax**2 + self.ymax**2 + self.zmax**2),       #rel_vertical_target_ang2, rel_horizontal_target_ang2, target_dist2
+                               np.pi, np.pi, np.sqrt(self.xmax**2 + self.ymax**2 + self.zmax**2)])       #rel_vertical_hazard_ang, rel_horizontal_hazard_ang, hazard_dist
         state_low = -state_high.copy()
-        #state_low[6], state_low[9], state_low[12] = 0, 0, 0 
+        state_low[6], state_low[9], state_low[12] = 0, 0, 0
         self.observation_space = spaces.Box(low=state_low, high=state_high, dtype=np.float64)
 
 
@@ -112,9 +109,9 @@ class DeepWellEnvSpher(gym.Env):
         state = np.array([
             self.vertical_angAcc, self.horizontal_angAcc,
             self.vertical_angVel, self.horizontal_angVel,
-            self.rel_vertical_target_ang1, self.rel_horizontal_target_ang1#, self.target_dist1,
-            #self.rel_vertical_target_ang2, self.rel_horizontal_target_ang2, self.target_dist2,
-            #self.rel_vertical_hazard_ang, self.rel_horizontal_hazard_ang, self.hazard_dist
+            self.rel_vertical_target_ang1, self.rel_horizontal_target_ang1, self.target_dist1,
+            self.rel_vertical_target_ang2, self.rel_horizontal_target_ang2 , self.target_dist2,
+            self.rel_vertical_hazard_ang, self.rel_horizontal_hazard_ang, self.hazard_dist
             ])
         return state
 
@@ -169,25 +166,30 @@ class DeepWellEnvSpher(gym.Env):
 
     def calc_dist_to_target(self):
         #Calculate and update distance to target(s)
-        self.xdist1 = self.targets[self.target_hits]['pos'][0] - self.x  #x-axis distance to next target
-        self.ydist1 = self.targets[self.target_hits]['pos'][1] - self.y  #y-axis distance to next target
-        self.zdist1 = self.targets[self.target_hits]['pos'][2] - self.z  #z-axis distance to next target
+        pos, rad = map(self.targets[self.target_hits].get, ['pos', 'radius'])
+        self.xdist1 = pos[0] - self.x - rad*np.sin(self.vertical_ang)*np.cos(self.horizontal_ang)  #x-axis distance to next target
+        self.ydist1 = pos[1] - self.y - rad*np.sin(self.vertical_ang)*np.sin(self.horizontal_ang)  #y-axis distance to next target
+        self.zdist1 = pos[2] - self.z - rad*np.cos(self.vertical_ang)                              #z-axis distance to next target
+
         if self.target_hits == self.numtargets - 1: #Only one target left
             self.xdist2 = self.xdist1
             self.ydist2 = self.ydist1
             self.zdist2 = self.zdist1
         else:
-            self.xdist2 = self.targets[self.target_hits+1]['pos'][0] - self.x  #x-axis distance to second next target
-            self.ydist2 = self.targets[self.target_hits+1]['pos'][1] - self.y  #y-axis distance to second next target
-            self.zdist2 = self.targets[self.target_hits+1]['pos'][2] - self.z  #z-axis distance to second next target
+            pos, rad = map(self.targets[self.target_hits+1].get, ['pos', 'radius'])
+            self.xdist2 = pos[0] - self.x - rad*np.sin(self.vertical_ang)*np.cos(self.horizontal_ang)  #x-axis distance to second next target
+            self.ydist2 = pos[1] - self.y - rad*np.sin(self.vertical_ang)*np.sin(self.horizontal_ang)  #y-axis distance to second next target
+            self.zdist2 = pos[2] - self.z - rad*np.cos(self.vertical_ang)                              #z-axis distance to second next target
+        
         self.target_dist1 = np.linalg.norm([self.xdist1, self.ydist1, self.zdist1])
         self.target_dist2 = np.linalg.norm([self.xdist2, self.ydist2, self.zdist2])
 
+
     def calc_target_ang(self):
-        self.vertical_target_ang1 = np.arctan2(np.sqrt(self.xdist1**2 + self.ydist1**2),self.zdist1)
-        self.horizontal_target_ang1 = np.arctan2(self.ydist1,self.xdist1)
-        self.vertical_target_ang2 = np.arctan2(np.sqrt(self.xdist2**2 + self.ydist2**2),self.zdist2)
-        self.horizontal_target_ang2 = np.arctan2(self.ydist2,self.xdist2)
+        self.vertical_target_ang1 = np.arctan2(np.sqrt(self.xdist1**2 + self.ydist1**2), self.zdist1)
+        self.horizontal_target_ang1 = np.arctan2(self.ydist1, self.xdist1)
+        self.vertical_target_ang2 = np.arctan2(np.sqrt(self.xdist2**2 + self.ydist2**2), self.zdist2)
+        self.horizontal_target_ang2 = np.arctan2(self.ydist2, self.xdist2)
 
     def calc_rel_target_ang(self):
         self.rel_vertical_target_ang1 = self.calc_angle_diff(self.vertical_ang, self.vertical_target_ang1)
@@ -241,8 +243,8 @@ class DeepWellEnvSpher(gym.Env):
                 reward -= 2000
                 done = True
             
-            if self.hazard_dist < self.hazards[closest_hz]['radius']*2:
-                rel_safe_dist = (self.hazards[closest_hz]['radius']*2 - self.hazard_dist)/(self.hazards[closest_hz]['radius']) # 0 if dist_hazard = 2*radius_hazard, 1 if dist_hazard = radius_hazard
+            if self.hazard_dist < 2*self.hazards[closest_hz]['radius']:
+                rel_safe_dist = 2*(self.hazards[closest_hz]['radius'] - self.hazard_dist)/(self.hazards[closest_hz]['radius']) # 0 if dist_hazard = 2*radius_hazard, 1 if dist_hazard = radius_hazard
                 reward -= 50*rel_safe_dist**2
 
 
