@@ -103,23 +103,24 @@ class DeepWellEnvSpher(gym.Env):
             self.hazard_dist = np.linalg.norm(self.hazard)
         else:
             self.hazard = np.array([
-                                    np.random.choice(-1, 1)*self.xmax,
-                                    np.random.choice(-1, 1)*self.ymax,
-                                    np.random.choice(-1, 1)*self.ymax
+                                    np.random.choice([-1, 1])*self.xmax,
+                                    np.random.choice([-1, 1])*self.ymax,
+                                    np.random.choice([-1, 1])*self.ymax
                                     ])
         self.vert_haz_rel_ang, self.hori_haz_rel_ang = calc_rel_ang(self.hazard,
                                     self.vertical_ang, self.horizontal_ang)
-        self.max_dist = self.calc_max_tot_dist()
+        self.max_dist, self.min_tot_dist = self.calc_max_tot_dist()
 
         state = self.get_state()
         return state
         
     def get_state(self):
-        target_dist1 = np.linalg.norm(self.target1) - self.targets[self.target_hits]['rad']
-        if self.target_hits == self.numtargets:
-            target_dist2 = target_dist1
-        else:
-            target_dist2 = np.linalg.norm(self.target2) - self.targets[self.target_hits+1]['rad']
+        if self.target_hits < self.numtargets:
+            self.target_dist1 = np.linalg.norm(self.target1) - self.targets[self.target_hits]['rad']
+            if self.target_hits == self.numtargets - 1:
+                self.target_dist2 = self.target_dist1
+            else:
+                self.target_dist2 = np.linalg.norm(self.target2) - self.targets[self.target_hits+1]['rad']
         hazard_dist = np.linalg.norm(self.hazard)
 
         state = np.array([
@@ -128,7 +129,7 @@ class DeepWellEnvSpher(gym.Env):
                 self.vert_targ_rel_ang1, self.hori_targ_rel_ang1, 
                 self.vert_targ_rel_ang2, self.hori_targ_rel_ang2,
                 self.vert_haz_rel_ang, self.hori_haz_rel_ang,
-                target_dist1, target_dist2, hazard_dist
+                self.target_dist1, self.target_dist2, hazard_dist
                 ])
         return state
 
@@ -250,8 +251,8 @@ class DeepWellEnvSpher(gym.Env):
         for i in range(self.numtargets):
             min_tot_dist += np.linalg.norm(self.targets[i]['pos'] - prev_p)
             max_dist[i] = self.rel_max_dist*min_tot_dist 
-            prev_p = np.array(self.targets[i]['pos'])
-        return max_dist
+            prev_p = self.targets[i]['pos']
+        return max_dist, min_tot_dist
 
     def outside_bounds(self):
         x = (self.x < self.xmin) or (self.x > self.xmax)
@@ -341,8 +342,11 @@ class DeepWellEnvSpher(gym.Env):
 if __name__ == '__main__' :
     env = DeepWellEnvSpher()
     env.reset()
-    for _ in range(10):
-        action = 0 #env.action_space.sample()
-        print(env.actions_dict[action])
-        print("Step: ", _ , " this is what the current state is:")
-        print(env.step(action))
+    import time
+    start = time.time()
+    for _ in range(50000):
+        action = env.action_space.sample()
+        #print(env.actions_dict[action])
+        #print("Step: ", _ , " this is what the current state is:")
+        env.step(action)
+    print("Elapsed time :", time.time() - start)
