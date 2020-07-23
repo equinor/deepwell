@@ -57,8 +57,8 @@ class DeepWellEnvSpher(gym.Env):
             0:[-incr, -incr], 1:[-incr, 0], 2:[-incr, incr],  # Actions:
             3:[0, -incr],     4:[0, 0],     5:[0, incr],      # [0] = vertical acceleration
             6:[incr, -incr],  7:[incr, 0],  8:[incr, incr],   # [1] = horizontal acceleration
-            }        
-        self.action_space = spaces.Discrete(9)
+            }          
+        self.action_space = spaces.Discrete(5)
         max_dist = np.sqrt(self.xmax**2 + self.ymax**2 + self.zmax**2)
         state_high = np.array([
                                MAX_ANGACC, MAX_ANGACC,      # vertical_angAcc, horizontal_angAcc,
@@ -264,20 +264,15 @@ class DeepWellEnvSpher(gym.Env):
         #Info for plotting and printing in run-file
         if done == True:
             info = {
-                'x': self.x, 'y': self.y, 'z': self.z,
-                'xtargets': [target['pos'][0] for target in self.targets],
-                'ytargets': [target['pos'][1] for target in self.targets],
-                'ztargets': [target['pos'][2] for target in self.targets],
-                't_radius': [target['rad'] for target in self.targets],
-                'hits': self.target_hits, 'tot_dist':self.dist_traveled, 
-                'min_dist':self.min_tot_dist,
-                'xhazards': [hazard['pos'][0] for hazard in self.hazards],
-                'yhazards': [hazard['pos'][1] for hazard in self.hazards],
-                'zhazards': [hazard['pos'][2] for hazard in self.hazards],
-                'h_radius': [hazard['rad'] for hazard in self.hazards]
+                'pos': self.get_pos(),
+                'targets': self.targets,
+                'hazards': self.hazards,
+                'hits': self.target_hits, 
+                'min_dist': self.min_tot_dist,
+                'tot_dist':self.dist_traveled
                 }
         else: 
-            info = {'x': self.x, 'y': self.y, 'z': self.z}
+            info = {'pos': self.get_pos()}
         return info
 
     def init_targets(self):
