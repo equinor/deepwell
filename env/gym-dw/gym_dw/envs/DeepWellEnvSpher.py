@@ -342,11 +342,8 @@ class DeepWellEnvSpher(gym.Env):
 if __name__ == '__main__' :
     env = DeepWellEnvSpher()
     env.reset()
-    import time
-    start = time.time()
-    for _ in range(50000):
-        action = env.action_space.sample()
-        #print(env.actions_dict[action])
-        #print("Step: ", _ , " this is what the current state is:")
-        env.step(action)
-    print("Elapsed time :", time.time() - start)
+    for _ in range(10):
+        action = 0 #env.action_space.sample()
+        print(env.actions_dict[action])
+        print("Step: ", _ , " this is what the current state is:")
+        print(env.step(action))
