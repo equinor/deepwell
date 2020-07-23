@@ -21,27 +21,21 @@ class PlotServer():
         app.run_server(host='0.0.0.0', port=8080, debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter   
         
 
+    def show_model_3d(self,env , model):
+        pos_list, info = self.get_well_path_3d(env, model)
+        targets = info['targets']
+        hazards = info['hazards']
 
-    def show_model_3d(self,env,model):
-        xcoord_list, ycoord_list, zcoord_list, info = self.get_well_path_3d(env,model)
+        figure = go.Figure(data=[go.Scatter3d(x=pos_list[:,0],
+                                              y=pos_list[:,1],
+                                              z=pos_list[:,2],
+                        mode='lines', name="Well path", line=dict(width=10.0))])
+        
+        for i in range(len(targets)):
+            self.plot_ball(figure, "Target", 'greens', targets[i])
 
-        figure = go.Figure(data=[go.Scatter3d(x=xcoord_list, y=ycoord_list, z=zcoord_list, mode='lines', name="Well path", line=dict(width=10.0))])
-
-        x_targets = info['xtargets']
-        y_targets = info['ytargets']
-        z_targets = info['ztargets']
-        radius_targets = info['t_radius']
-
-        x_hazards = info['xhazards']
-        y_hazards = info['yhazards']
-        z_hazards = info['zhazards']
-        radius_hazards = info['h_radius']
-
-        for i in range(len(x_targets)):
-            self.plot_ball(figure, "Target", 'greens', x_targets[i], y_targets[i], z_targets[i], radius_targets[i])
-
-        for i in range(len(x_hazards)):
-            self.plot_ball(figure, "Hazard", 'reds', x_hazards[i], y_hazards[i], z_hazards[i], radius_hazards[i])
+        for i in range(len(hazards)):
+            self.plot_ball(figure, "Hazard", 'reds', hazards[i])
 
         figure.update_layout(
             scene_aspectmode='cube',
@@ -49,9 +43,9 @@ class PlotServer():
             width=800, height=700,
             margin = dict(t=40, r=0, l=20, b=20),
             scene = dict(
-                xaxis = dict(nticks=4, range=[env.xmin,env.xmax], title_text="East",),
-                yaxis = dict(nticks=4, range=[env.ymin,env.ymax], title_text="North",),
-                zaxis = dict(nticks=4, range=[env.zmax,env.zmin], title_text="TVD",),
+                xaxis = dict(nticks=4, range=[env.xmin, env.xmax], title_text="East",),
+                yaxis = dict(nticks=4, range=[env.ymin, env.ymax], title_text="North",),
+                zaxis = dict(nticks=4, range=[env.zmax, env.zmin], title_text="TVD",),
             ),
         )
 
@@ -67,32 +61,29 @@ class PlotServer():
 
 
     #Test the trained model, run until done, return list of visited coords
-    def get_well_path_3d(self,env,model):
+    def get_well_path_3d(self, env, model):
         obs = env.reset()
-        xcoord_list = [env.x]      #Initialize list of path coordinates with initial position
-        ycoord_list = [env.y]
-        zcoord_list = [env.z]
-        info = {}
+        pos_list = [env.get_pos()]      #Initialize list of path coordinates with initial position
 
         while True:
             action, _states = model.predict(obs)
             obs, rewards, done, info = env.step(action)
 
             print("reward: ",rewards) 
-            xcoord_list.append(info['x'])
-            ycoord_list.append(info['y'])
-            zcoord_list.append(info['z'])
-
+            pos_list.append(info['pos'])
             if done: break
+        pos_list = np.array(pos_list)
 
-        return xcoord_list, ycoord_list, zcoord_list, info
+        return pos_list, info
 
 
-
-    def plot_ball(self, figure, name, color, x0, y0, z0, radius):
+    def plot_ball(self, figure, name, color, object):
         # Make data
         u = np.linspace(0, 2 * np.pi, 100)
         v = np.linspace(0, np.pi, 100)
+
+        x0, y0, z0 = object['pos']
+        radius = object['rad']
 
         x = x0 + radius * np.outer(np.cos(u), np.sin(v))
         y = y0 + radius * np.outer(np.sin(u), np.sin(v))
