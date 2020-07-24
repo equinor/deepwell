@@ -38,23 +38,32 @@ class ppo2leveltrain(ppo2):
 
         print("NOTE: No matter what env you pass to this agent, ppo2leveltrain will use DeepWellEnvSpherlevel1-v0 initially, and then increse levels ")
         
-        levels = 5
-        print("====================== Initiating environment ==========================")
+        total_levels = 5
+        
         env = gym.make('DeepWellEnvSpherlevel1-v0')
         model = PPO2('MlpPolicy', env, verbose=1, tensorboard_log=tensorboard_logs_path)
-        model.save(modelpath)
+        
+        level_modelpath = modelpath + "_level1"
+        model.save(level_modelpath)
 
         # Train model for increasingly difficult levels
-        for i in range(1, levels+1):
+        for current_level in range(1, total_levels+1):
             #if i == 1:
             #    timesteps = float(timesteps)/(8*levels)  # Divide by 8 as num env = 8
             #else: 
             #    timesteps = float(timesteps)/(levels)    # When loading it trains the inputed number of timesteps
 
-            env = gym.make('DeepWellEnvSpherlevel'+str(i)+'-v0')
-            model = super().retrain(env, int(timesteps), modelpath, tensorboard_logs_path)
+            env = gym.make('DeepWellEnvSpherlevel'+str(current_level)+'-v0')
+
+            model = self.load(level_modelpath, tensorboard_logs_path)                   #Load previous model
+            env_str = self.get_env_str(env)
+            model.set_env(make_vec_env(env_str, n_envs=8))
+            model.learn(total_timesteps=timesteps, reset_num_timesteps=False, tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))      #Continue training previous model
             
-            print("====================== Level " + str(i) + " finished with "+ str(timesteps) +" timesteps ==========================")
+            level_modelpath = modelpath + "_level" + str(current_level)             #Generate new name of newly trained model
+            model.save(level_modelpath)                                             #Save newly trained model
+            
+            print("====================== Level " + str(current_level) + " finished with "+ str(timesteps) +" timesteps ==========================")
             
             #The models at each level gets saved in super().retrain()
         return model
