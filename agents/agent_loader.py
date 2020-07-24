@@ -39,7 +39,7 @@ class AgentLoader:
          
         elif text_argument == "retrain":                        # This is for retraining the model, for tensorboard integration load the tensorboard log from your trained model and create a new name in model.learn below.
             print("====================== NOW RETRAINING MODEL ==========================")
-            model = agent.retrain(env, trained_models_path+model_name, tensorboard_logs_path, int(num_argument))
+            model = agent.retrain(env, int(num_argument), trained_models_path+model_name, tensorboard_logs_path)
             #model.save(trained_models_path + model_name)
             return model
 
