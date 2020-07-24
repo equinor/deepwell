@@ -1,14 +1,13 @@
 from plot_server import PlotServer                           #Import the server that plots the result in browser
-from agents.ppo2 import ppo2
+from agents.ppo2 import ppo2, ppo2leveltrain, ppo2callback
+from agents.dqn import dqn
+
+from agents.agent_loader import AgentLoader
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
 
 import gym
 from gym_dw import envs
-from stable_baselines import PPO2
 
-#Env names:
-#agent = gym.make('DeepWellEnv-v0')
-#agent = gym.make('DeepWellEnv2-v0')
 
 def main():
     ###### INSTANTIATE AND TRAIN YOUR AGENT HERE ######
@@ -17,10 +16,12 @@ def main():
 
     #Set up environment
     env = gym.make('DeepWellEnvSpher-v0')
-    agent = ppo2(env)
-    model = agent.get_model()
+    #agent = ppo2()
+    #agent = dqn()
+    agent = ppo2leveltrain()
 
-    ###### THIS PART STARTS THE WEBSERVER FOR SHOWING PLOT ######
+    model = AgentLoader().get_model(env,agent)
+
     PlotServer().show_model_3d(env, model)         #The server needs a model and an env to generate a wellpath and plot it
 
 

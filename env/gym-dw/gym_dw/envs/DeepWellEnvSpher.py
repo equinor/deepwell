@@ -58,7 +58,7 @@ class DeepWellEnvSpher(gym.Env):
             3:[0, -incr],     4:[0, 0],     5:[0, incr],      # [0] = vertical acceleration
             6:[incr, -incr],  7:[incr, 0],  8:[incr, incr],   # [1] = horizontal acceleration
             }          
-        self.action_space = spaces.Discrete(5)
+        self.action_space = spaces.Discrete(9)
         max_dist = np.sqrt(self.xmax**2 + self.ymax**2 + self.zmax**2)
         state_high = np.array([
                                MAX_ANGACC, MAX_ANGACC,      # vertical_angAcc, horizontal_angAcc,
