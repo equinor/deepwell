@@ -53,5 +53,5 @@ Inheriting from DeepWellEnvSpher to create different instances (levels) of the s
 **Observation space:**&nbsp;&nbsp;&nbsp;&nbsp;[vert_angAcc, hor_angAcc, vert_angVel, hor_angVel, rel_vert_targetAng1, rel_hor_targetAng1,\
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rel_vert_targetAng2, rel_hor_targetAng2, rel_vert_hazardAng, rel_hor_hazardAng, target_dist1, target_dist2, hazard_dist2]\
 **Action space:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Discrete(9)\
-**Plotting:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Local plotting supported through render function inside environment\
+**Plotting:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plotting supported through the PlotServer in main.py\
 **Preferred learn. alg:**&nbsp;&nbsp;&nbsp;DQN
