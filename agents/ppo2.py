@@ -50,14 +50,12 @@ class ppo2leveltrain(ppo2):
             #    timesteps = float(timesteps)/(8*levels)  # Divide by 8 as num env = 8
             #else: 
             #    timesteps = float(timesteps)/(levels)    # When loading it trains the inputed number of timesteps
-            
-            print("TIMESTEPS: ", timesteps)
 
             env = gym.make('DeepWellEnvSpherlevel'+str(i)+'-v0')
             model = super().retrain(env, int(timesteps), modelpath, tensorboard_logs_path)
             
-            print("====================== Level " + str(i) + " finished ==========================")
-
+            print("====================== Level " + str(i) + " finished with "+ str(timesteps) +" timesteps ==========================")
+            
             #The models at each level gets saved in super().retrain()
         return model
 
