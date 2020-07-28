@@ -1,6 +1,8 @@
 import sys
 from datetime import datetime
 import numpy as np
+from agents.ppo2 import ppo2, ppo2leveltrain, ppo2callback
+from agents.dqn import dqn, dqnleveltrain
 
 # Filter tensorflow version warnings
 import os               # https://stackoverflow.com/questions/40426502/is-there-a-way-to-suppress-the-messages-tensorflow-prints/40426709
@@ -21,15 +23,28 @@ tf.get_logger().setLevel(logging.ERROR)
 class AgentLoader:
     
     #Get model either by training a new one or loading an old one
-    def get_model(self,env,agent):
+    def get_model(self,env):
         #sys.argv fetches arg when running "deepwellstart.ps1 -r arg". This is to make it possible to load,train or retrain the agent.
         mainpy_path, text_argument, num_argument = sys.argv[0], sys.argv[1], sys.argv[2]
         #mainpy_path is the path of main.py = '/app/main.py'
         #If no argument is given (deepwellstart.ps1 -r), text_argument = " "
+
+        #Set model name for new model
         try: model_name = sys.argv[3] 
         except: 
             model_name = datetime.now().strftime('%d%m%y-%H%M')
             print("Model name not given, name will be set to: ", model_name)
+        #Set agent by giving it as an argument, default is dqnleveltrain
+        try: agent_name = sys.argv[4]
+        except:
+            print("Agent not specified, using default agent: dqnleveltrain()")
+            agent = dqnleveltrain()
+
+        if agent_name == 'ppo2': agent = ppo2()
+        elif agent_name == 'ppo2leveltrain': agent = ppo2leveltrain()
+        elif agent_name == 'ppo2callback' : agent = ppo2callback()
+        elif agent_name == 'dqn': agent = dqn()
+        else: agent = dqnleveltrain()
 
         tensorboard_logs_path = "app/tensorboard_logs/"
         trained_models_path = "app/trained_models/"
