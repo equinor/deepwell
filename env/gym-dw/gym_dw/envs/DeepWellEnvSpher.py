@@ -3,9 +3,9 @@ from gym import spaces
 import numpy as np
 import random
 
-MAX_ANGVEL = 0.05
-MAX_ANGACC = 0.01
-ANGACC_INCREMENT = 0.005
+MAX_ANGVEL = 0.1
+MAX_ANGACC = 0.02
+ANGACC_INCREMENT = 0.02
 STEP_LENGTH = 10.0
 
 def calc_ang_diff(ang1, ang2):
