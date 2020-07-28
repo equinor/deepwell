@@ -258,7 +258,7 @@ class DeepWellEnvSpher(gym.Env):
         x = (self.x < self.xmin) or (self.x > self.xmax)
         y = (self.y < self.ymin) or (self.y > self.ymax)
         z = (self.z < self.zmin) or (self.z > self.zmax)
-        return x and y and z
+        return x or y or z
 
     def get_info(self, done):
         #Info for plotting and printing in run-file
