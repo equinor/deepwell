@@ -46,7 +46,7 @@ register(
 )
 
 register(
-    id='DeepWellEnvSpherlevel9-v0',
+    id='DeepWellEnvSpherlevel6-v0',
     entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level6'
 )
 
