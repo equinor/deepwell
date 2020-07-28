@@ -1,4 +1,4 @@
-from plot_server import PlotServer                           #Import the server that plots the result in browser
+from plot_server import PlotServer2d, PlotServer3d                           #Import the server that plots the result in browser
 from agents.ppo2 import ppo2, ppo2leveltrain, ppo2callback
 from agents.dqn import dqn, dqnleveltrain
 
@@ -22,7 +22,7 @@ def main():
 
     model = AgentLoader().get_model(env,agent)
 
-    PlotServer().show_model_3d(env, model)         #The server needs a model and an env to generate a wellpath and plot it
+    PlotServer3d().show_model(env, model)         #The server needs a model and an env to generate a wellpath and plot it
 
 
 if __name__ == "__main__":
