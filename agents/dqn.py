@@ -30,26 +30,26 @@ class dqn(agent):
 
 
 class dqnleveltrain(dqn):
+    def __init__(self):
+        self.policy_kwargs = dict(layers = [64,64,64,32]) #To change network architecture from the default [64,64]
 
     def leveltrain(self, from_level, to_level, env, timesteps, level_modelpath, tensorboard_logs_path):
-        model = DQN('MlpPolicy', env, verbose=1, tensorboard_log=tensorboard_logs_path)
+        model = DQN('MlpPolicy', env, verbose=1, policy_kwargs=self.policy_kwargs, prioritized_replay=True, buffer_size=100000,
+                     learning_rate=0.0003,exploration_final_eps=0,tensorboard_log=tensorboard_logs_path)
         model.save(level_modelpath)
 
-        for current_level in range(from_level, to_level+1):                                  # Train model for increasingly difficult levels      
-            if current_level == from_level: new_timesteps = int(timesteps)//(to_level)     
-            else: new_timesteps = int(timesteps)//to_level
-
+        for current_level in range(from_level, to_level+1):                               # Train model for increasingly difficult levels      
             env = gym.make('DeepWellEnvSpherlevel'+str(current_level)+'-v0')
 
             model = self.load(level_modelpath, tensorboard_logs_path)                     # Load previous model
             env_str = self.get_env_str(env)
             model.set_env(make_vec_env(env_str, n_envs=1))
-            model.learn(total_timesteps=new_timesteps, reset_num_timesteps=False, tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))      # Continue training previous model
+            model.learn(total_timesteps=timesteps, reset_num_timesteps=False, tb_log_name="TB_"+datetime.now().strftime('%d%m%y-%H%M'))      # Continue training previous model
             
             level_modelpath = level_modelpath[0:-1] + str(current_level)                  # Generate new name of newly trained model
             model.save(level_modelpath)                                                   # Save newly trained model
             
-            print("====================== Level " + str(current_level) + " finished with "+ str(new_timesteps) +" timesteps ==========================")
+            print("====================== Level " + str(current_level) + " finished with "+ str(timesteps) +" timesteps ==========================")
     
         return model
     
@@ -58,7 +58,7 @@ class dqnleveltrain(dqn):
         print("NOTE: No matter what env you pass to this agent, dqnleveltrain will use DeepWellEnvSpherlevel1-v0 initially, and then increse levels ")
         env = gym.make('DeepWellEnvSpherlevel1-v0')
         level_modelpath = modelpath + "_level1"
-        total_levels = 5
+        total_levels = 6                                                                  # Set how many levels you want to train
         return self.leveltrain(1, total_levels, env, timesteps, level_modelpath, tensorboard_logs_path)
 
 
