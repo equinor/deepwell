@@ -26,7 +26,6 @@ def calc_rel_ang(vec, vertical_ang, horizontal_ang):
     horizontal_rel_ang = calc_ang_diff(horizontal_ang, horizontal_object_ang)
     return vertical_rel_ang, horizontal_rel_ang
 
-
 class DeepWellEnvSpher(gym.Env):
 
     def __init__(self):
@@ -166,6 +165,8 @@ class DeepWellEnvSpher(gym.Env):
             self.vertical_angVel = 0
         self.horizontal_ang = (self.horizontal_ang + self.horizontal_angVel) % (2*np.pi)
 
+        #print("############", self.vertical_ang, self.horizontal_ang)
+
         # update position
         self.x += STEP_LENGTH * np.sin(self.vertical_ang) * np.cos(self.horizontal_ang)
         self.y += STEP_LENGTH * np.sin(self.vertical_ang) * np.sin(self.horizontal_ang)
@@ -188,7 +189,12 @@ class DeepWellEnvSpher(gym.Env):
 
         reward = -3*dist_diff
         reward -= abs(self.vert_targ_rel_ang1) + abs(self.hori_targ_rel_ang1)
-               
+
+        if self.vertical_angVel != 0:
+            reward += 100*self.vertical_angVel*np.sign(self.vert_targ_rel_ang1)
+        if self.horizontal_angVel != 0:
+            reward += 100*self.horizontal_angVel*np.sign(self.hori_targ_rel_ang1)
+             
         if self.numhazards > 0:
             closest_hz, self.hazard = self.find_closest_hazard()
             self.hazard_dist = np.linalg.norm(self.hazard)
@@ -202,7 +208,7 @@ class DeepWellEnvSpher(gym.Env):
                 reward -= 50*rel_safe_dist**2
         
         if self.outside_bounds():
-            reward -= 1500
+            reward -= 6000
             done = True
 
         #Check if maximum travel range has been reached
@@ -338,7 +344,7 @@ if __name__ == '__main__' :
     env = DeepWellEnvSpher()
     env.reset()
     for _ in range(10):
-        action = 0 #env.action_space.sample()
+        action = 7 #env.action_space.sample()
         print(env.actions_dict[action])
         print("Step: ", _ , " this is what the current state is:")
         print(env.step(action))

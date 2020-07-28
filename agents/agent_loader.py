@@ -38,7 +38,7 @@ class AgentLoader:
         try: agent_name = sys.argv[4]
         except:
             print("Agent not specified, using default agent: dqnleveltrain()")
-            agent = dqnleveltrain()
+            agent_name = dqnleveltrain()
 
         if agent_name == 'ppo2': agent = ppo2()
         elif agent_name == 'ppo2leveltrain': agent = ppo2leveltrain()
