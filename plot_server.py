@@ -8,6 +8,9 @@ import dash_html_components as html
 import plotly.graph_objects as go # or plotly.express as px
 import numpy as np
 
+import plotly.express as px
+
+
 class PlotServer():
 
     def start_server(self, figure):
@@ -19,10 +22,29 @@ class PlotServer():
         ], style={'width': '100%', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'})
 
         app.run_server(host='0.0.0.0', port=8080, debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter   
+
+
+    #Test the trained model, run until done, return list of visited coords
+    def get_well_path(self, env, model):
+        obs = env.reset()
+        pos_list = [env.get_pos()]      #Initialize list of path coordinates with initial position
+
+        while True:
+            action, _states = model.predict(obs)
+            obs, rewards, done, info = env.step(action)
+
+            print("reward: ",rewards) 
+            pos_list.append(info['pos'])
+            if done: break
+        pos_list = np.array(pos_list)
+
+        return pos_list, info
         
 
-    def show_model_3d(self,env , model):
-        pos_list, info = self.get_well_path_3d(env, model)
+class PlotServer3d(PlotServer):
+
+    def show_model(self,env,model):
+        pos_list, info = self.get_well_path(env, model)
         targets = info['targets']
         hazards = info['hazards']
 
@@ -56,26 +78,6 @@ class PlotServer():
         self.start_server(figure)
 
 
-    #def show_model_2d(self, xcoord_list, ycoord_list, info):
-    #    self.start_server(figure)
-
-
-    #Test the trained model, run until done, return list of visited coords
-    def get_well_path_3d(self, env, model):
-        obs = env.reset()
-        pos_list = [env.get_pos()]      #Initialize list of path coordinates with initial position
-
-        while True:
-            action, _states = model.predict(obs)
-            obs, rewards, done, info = env.step(action)
-
-            print("reward: ",rewards) 
-            pos_list.append(info['pos'])
-            if done: break
-        pos_list = np.array(pos_list)
-
-        return pos_list, info
-
 
     def plot_ball(self, figure, name, color, object):
         # Make data
@@ -92,3 +94,43 @@ class PlotServer():
         # Plot the surface
         figure.add_trace(
             go.Surface(x=x, y=y, z=z, colorscale=color, showscale=False, name=name),)
+
+
+class PlotServer2d(PlotServer):
+
+    def show_model(self,env,model):
+        pos_list, info = self.get_well_path(self,env,model)
+        targets = info['targets']
+        hazards = info['hazards']
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=pos_list[:,0], y=pos_list[:,1],
+                    mode='lines',
+                    name='lines',
+                    title='Deepwell 2d plot'))
+
+
+        for i in range(len(targets)):
+            self.plot_ball(figure, "Target", 'greens', targets[i])
+
+        for i in range(len(hazards)):
+            self.plot_ball(figure, "Hazard", 'reds', hazards[i])
+
+        figure.update_layout()
+
+        print("Minimum total distance: ", info['min_dist'])
+        print("Distance traveled: ", info['tot_dist'])    
+        print("Target hits:     ", info['hits'])
+
+        self.start_server(figure)
+
+
+    def plot_disk(self, figure, name, color, object):
+
+        x0, y0 = object['pos']
+        radius = object['rad']
+
+        figure.add_trace()
+    
+
+

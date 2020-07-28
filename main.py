@@ -1,4 +1,4 @@
-from plot_server import PlotServer                           #Import the server that plots the result in browser
+from plot_server import PlotServer2d, PlotServer3d                           #Import the server that plots the result in browser
 from agents.agent_loader import AgentLoader
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
 
@@ -16,7 +16,7 @@ def main():
 
     model = AgentLoader().get_model(env)
 
-    PlotServer().show_model_3d(env, model)         #The server needs a model and an env to generate a wellpath and plot it
+    PlotServer3d().show_model(env, model)         #The server needs a model and an env to generate a wellpath and plot it
 
 
 if __name__ == "__main__":
