@@ -37,7 +37,7 @@ class DeepWellEnvSpher(gym.Env):
         self.zmin = 0
         self.zmax = 3000         #(>1000)
 
-        self.rel_max_dist = 3    #Set when to exit episode (dist_traveled > rel_max_dist*min_tot_dist = max_tot_dist)
+        self.rel_max_dist = 2    #Set when to exit episode (dist_traveled > rel_max_dist*min_tot_dist = max_tot_dist)
         self.numtargets = 5     #==SET NUMBER OF TARGETS==#
         self.min_radius = 100
         self.max_radius = 100
@@ -202,7 +202,7 @@ class DeepWellEnvSpher(gym.Env):
                 reward -= 50*rel_safe_dist**2
         
         if self.outside_bounds():
-            reward -= 3000
+            reward -= 1500
             done = True
 
         #Check if maximum travel range has been reached
