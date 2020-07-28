@@ -23,10 +23,13 @@ class AgentLoader:
     #Get model either by training a new one or loading an old one
     def get_model(self,env,agent):
         #sys.argv fetches arg when running "deepwellstart.ps1 -r arg". This is to make it possible to load,train or retrain the agent.
-        mainpy_path, text_argument, num_argument, model_name = sys.argv[0], sys.argv[1], sys.argv[2], sys.argv[3]
+        mainpy_path, text_argument, num_argument = sys.argv[0], sys.argv[1], sys.argv[2]
         #mainpy_path is the path of main.py = '/app/main.py'
         #If no argument is given (deepwellstart.ps1 -r), text_argument = " "
-        if model_name == " " : model_name = datetime.now().strftime('%d%m%y-%H%M')
+        try: model_name = sys.argv[3] 
+        except: 
+            model_name = datetime.now().strftime('%d%m%y-%H%M')
+            print("Model name not given, name will be set to: ", model_name)
 
         tensorboard_logs_path = "app/tensorboard_logs/"
         trained_models_path = "app/trained_models/"
