@@ -44,3 +44,13 @@ register(
     id='DeepWellEnvSpherlevel5-v0',
     entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level5'
 )
+
+register(
+    id='DeepWellEnvSpherlevel9-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level6'
+)
+
+register(
+    id='DeepWellEnvSpherlevel7-v0',
+    entry_point='gym_dw.envs.DeepWellEnvSpherLevels:Level7'
+)
