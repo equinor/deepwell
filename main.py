@@ -1,6 +1,6 @@
 from plot_server import PlotServer                           #Import the server that plots the result in browser
 from agents.ppo2 import ppo2, ppo2leveltrain, ppo2callback
-from agents.dqn import dqn
+from agents.dqn import dqn, dqnleveltrain
 
 from agents.agent_loader import AgentLoader
 #from <FOLDERNAME>.<FILENAME> import *              #Import your code/agents like this. The star means that you import all classes in the file.
@@ -18,7 +18,7 @@ def main():
     env = gym.make('DeepWellEnvSpher-v0')
     #agent = ppo2()
     #agent = dqn()
-    agent = ppo2leveltrain()
+    agent = dqnleveltrain()
 
     model = AgentLoader().get_model(env,agent)
 
