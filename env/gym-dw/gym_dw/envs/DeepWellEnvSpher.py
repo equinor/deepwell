@@ -202,7 +202,7 @@ class DeepWellEnvSpher(gym.Env):
                 reward -= 50*rel_safe_dist**2
         
         if self.outside_bounds():
-            reward -= 3000
+            reward -= 1500
             done = True
 
         #Check if maximum travel range has been reached
