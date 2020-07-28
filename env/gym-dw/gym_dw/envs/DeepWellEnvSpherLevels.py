@@ -61,6 +61,32 @@ class Level5(DeepWellEnvSpher):
         self.reset()
 
 
+class Level6(DeepWellEnvSpher):
+    
+    def __init__(self):
+        DeepWellEnvSpher.__init__(self)
+        self.deltaY_target = 200
+        self.maxdeltaZ_target = 500
+        self.numhazards = 7
+        self.min_radius = 100
+        self.max_radius = 100
+        self.reset()
+
+
+class Level7(DeepWellEnvSpher):
+    
+    def __init__(self):
+        DeepWellEnvSpher.__init__(self)
+        self.deltaY_target = 200
+        self.maxdeltaZ_target = 500
+        self.numhazards = 10
+        self.min_radius_hazard = 75
+        self.max_radius_hazard = 150
+        self.min_radius = 75
+        self.max_radius = 150
+        self.reset()
+
+
 
 if __name__ == '__main__' :
     env = DeepWellEnvSpher()

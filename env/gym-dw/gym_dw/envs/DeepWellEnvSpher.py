@@ -3,9 +3,9 @@ from gym import spaces
 import numpy as np
 import random
 
-MAX_ANGVEL = 0.05
-MAX_ANGACC = 0.01
-ANGACC_INCREMENT = 0.005
+MAX_ANGVEL = 0.1
+MAX_ANGACC = 0.02
+ANGACC_INCREMENT = 0.02
 STEP_LENGTH = 10.0
 
 def calc_ang_diff(ang1, ang2):
@@ -258,7 +258,7 @@ class DeepWellEnvSpher(gym.Env):
         x = (self.x < self.xmin) or (self.x > self.xmax)
         y = (self.y < self.ymin) or (self.y > self.ymax)
         z = (self.z < self.zmin) or (self.z > self.zmax)
-        return x and y and z
+        return x or y or z
 
     def get_info(self, done):
         #Info for plotting and printing in run-file

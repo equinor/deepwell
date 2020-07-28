@@ -3,6 +3,7 @@ __pycache__/
 env/gym-dw/gym_dw.egg-info
 .vscode
 .vscode/
+model_logs
 
 #Exclude content 
 trained_models/*
