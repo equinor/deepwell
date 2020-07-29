@@ -13,7 +13,16 @@ Then you can navigate to the deepwell repository on your computer and build the 
     .\deepwellstart.ps1 -build
 Then, to train the agent, simply enter:
 
-    .\deepwellstart.ps1 -run train <num timesteps> <model nickname>
+    .\deepwellstart.ps1 -run train <num timesteps> <model nickname> <agent>
+
+You choose agent by giving one of these arguments:
+* ppo2
+* ppo2leveltrain
+* ppo2callback
+* dqn
+* dqnleveltrain
+
+*Dqnleveltrain* is chosen by default if no agent is given.
 
 A handy tip is just to write the first couple of letters "de" and press tab to complete.
 
