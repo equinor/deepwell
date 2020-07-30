@@ -188,7 +188,8 @@ class DeepWellEnvSpher(gym.Env):
                                             self.vertical_ang, self.horizontal_ang)
 
         reward = -3*dist_diff
-        reward -= abs(self.vert_targ_rel_ang1) + abs(self.hori_targ_rel_ang1)
+
+        reward += 10*np.cos(self.vert_targ_rel_ang1) + 10*np.cos(self.hori_targ_rel_ang1)
 
         if self.vertical_angVel != 0:
             reward += 100*self.vertical_angVel*np.sign(self.vert_targ_rel_ang1)
