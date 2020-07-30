@@ -58,10 +58,10 @@ Inheriting from DeepWellEnvSpher to create different instances (levels) of the s
 **Preferred learn. alg:**&nbsp;&nbsp;&nbsp;DQN
 
 ## DeepWellEnvSpherSmallObs
-Modified version of DeepWellEnvSpher using a smaller observation space.
+Modified version of DeepWellEnvSpher using a smaller observation space. Stable and easy-to-learn environment, but agents won't be able to steer away from hazards.
 
 **Coordinates:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spherical\
 **Observation space:**&nbsp;&nbsp;&nbsp;&nbsp;[vert_angAcc, hor_angAcc, vert_angVel, hor_angVel, rel_vert_targetAng1, rel_hor_targetAng1]\
 **Action space:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Discrete(9)\
 **Plotting:**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plotting supported through the PlotServer in main.py\
-**Preferred learn. alg:**&nbsp;&nbsp;&nbsp;DQN
+**Preferred learn. alg:**&nbsp;&nbsp;&nbsp;PP02
