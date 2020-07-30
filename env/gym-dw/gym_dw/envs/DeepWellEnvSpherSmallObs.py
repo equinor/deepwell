@@ -26,7 +26,7 @@ def calc_rel_ang(vec, vertical_ang, horizontal_ang):
     horizontal_rel_ang = calc_ang_diff(horizontal_ang, horizontal_object_ang)
     return vertical_rel_ang, horizontal_rel_ang
 
-class DeepWellEnvSpher(gym.Env):
+class DeepWellEnvSpherSmallObs(gym.Env):
 
     def __init__(self):
         self.xmin = 0
