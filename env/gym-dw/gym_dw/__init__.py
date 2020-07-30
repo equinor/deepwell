@@ -21,7 +21,7 @@ register(
 
 register(
     id='DeepWellEnvSpherSmallObs-v0',
-    entry_point='gym_dw.envs.DeepWellEnvSpherSmallObs'
+    entry_point='gym_dw.envs:DeepWellEnvSpherSmallObs'
 )
 
 # Register different levels of DeepWellEnvSpher for level training
