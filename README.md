@@ -54,7 +54,11 @@ Retrain the myppo2model model with 10000 timesteps:
 
 Load and run model:
 
-    .\deepwellstart.ps1 -r load myppo2model
+    .\deepwellstart.ps1 -r load <model nickname> <agent name>
+    
+For example:
+
+    .\deepwellstart.ps1 -r load myppo2model ppo2
 
 
 ## Running without script (Non windows)
