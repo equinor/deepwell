@@ -51,7 +51,7 @@ class DeepWellEnv(gym.Env):
         #Set distances to closest hazard
         if self.numhazards > 0:
             diff = [(np.array(hazard['pos']) - [self.x, self.y]) for hazard in self.hazards]
-            diffnorms = [np.linalg.norm([element[0], element[1]]) for element in diff]
+            diffnorms = [np.linalg.norm(element) for element in diff]
             closest_hz = np.argmin(diffnorms)
             self.xdist_hazard = diff[closest_hz][0]
             self.ydist_hazard = diff[closest_hz][1]
@@ -105,8 +105,8 @@ class DeepWellEnv(gym.Env):
 
         #Check new hazard distance (reward)
         if self.numhazards > 0:
-            diff = [(np.array(hazard['pos'])-[self.x,self.y]) for hazard in self.hazards]
-            diffnorms = [np.linalg.norm([element[0], element[1]]) for element in diff]
+            diff = [(np.array(hazard['pos'])-[self.x, self.y]) for hazard in self.hazards]
+            diffnorms = [np.linalg.norm(element) for element in diff]
             closest_hz = np.argmin(diffnorms)
             dist_hazard = diffnorms[closest_hz]
             haz_rad = self.hazards[closest_hz]['radius']
