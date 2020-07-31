@@ -4,7 +4,7 @@ Team repo for Wishing Well team - Virtual summer internship 2020
 
 Using the open source tools OpenAI Gym and Stable Baselines we simulate simple drilling environments and train agents to efficiently find the optimal drilling paths. The environments, which are either 2D or 3D, have included both targets to hit and hazards to avoid. More information on the different environments can be found in [gym_dw/envs](https://github.com/equinor/deepwell/blob/dev/env/gym-dw/gym_dw/envs/README.md). Among the reinforcement learning algorithms we have mostly used the TRPO, PPO2 and DQN. Some pretrained agents using these algorithms can be found in [trained models](https://github.com/equinor/deepwell/tree/dev/trained_models). Below you'll find instructions on how to start and keep track of the agent learning process for a given drilling environment.
 
-## Installation (windows)
+## Installation (Windows)
 
 1. Make sure you have Docker Desktop installed on your computer
     https://docs.docker.com/docker-for-windows/install/
@@ -13,26 +13,24 @@ Using the open source tools OpenAI Gym and Stable Baselines we simulate simple d
 
     git clone https://github.com/equinor/deepwell
     cd deepwell
+    
+3. First, open powershell and make sure you are allowed to run scripts by entering:
+    ```
+    Set-ExecutionPolicy Unrestricted
+    ```
+   You only have to do that one time.
 
-3. Build the docker image
-
+4. Then you can navigate to the deepwell repository on your computer and build the container by running: 
+    ```
     .\deepwellstart.ps1 -build
-
-    All dependencies are installed when building the image for the first time.
-
-4. Train, retrain, leveltrain or load different agents using the arguments below.
+    ```
+   All dependencies are installed when building the image for the first time.
+   
+5. Train, retrain, leveltrain or load different agents using the arguments below.
 
 ## Running with script (Windows/PowerShell)
 
-First, open powershell and make sure you are allowed to run scripts by entering:
-
-    Set-ExecutionPolicy Unrestricted
-
-You only have to do that one time.
-Then you can navigate to the deepwell repository on your computer and build the container by running:
-
-    .\deepwellstart.ps1 -build
-Then, to train the agent, simply enter:
+After you have built the container you train the agent by entering:
 
     .\deepwellstart.ps1 -run train <num timesteps> <model nickname> <agent>
 
