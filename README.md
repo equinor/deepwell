@@ -7,12 +7,14 @@ Using the open source tools OpenAI Gym and Stable Baselines we simulate simple d
 ## Installation (Windows)
 
 1. Make sure you have Docker Desktop installed on your computer
+
     https://docs.docker.com/docker-for-windows/install/
 
 2. Clone the repository 
-
+    ```
     git clone https://github.com/equinor/deepwell
     cd deepwell
+    ```
     
 3. First, open powershell and make sure you are allowed to run scripts by entering:
     ```
