@@ -18,7 +18,7 @@ Using the open source tools OpenAI Gym and Stable Baselines we simulate simple d
 
     .\deepwellstart.ps1 -build
 
-All dependencies are installed when building the image for the first time.
+    All dependencies are installed when building the image for the first time.
 
 4. Train, retrain, leveltrain or load different agents using the arguments below.
 
