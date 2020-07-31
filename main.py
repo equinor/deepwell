@@ -11,11 +11,14 @@ def main():
 
     #Set up environment
     env = gym.make('DeepWellEnvSpher-v0')
+    #env = gym.make('DeepWellEnv-v0')
     
+
     #Remember to put your agents in the agents folder, you can use ppo2.py as a template
 
     model = AgentLoader().get_model(env)
 
+    #PlotServer3d().show_model(env, model)         #The server needs a model and an env to generate a wellpath and plot it
     PlotServer3d().show_model(env, model)         #The server needs a model and an env to generate a wellpath and plot it
 
 

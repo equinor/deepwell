@@ -1,0 +1,8 @@
+gunicorn
+pandas==0.24.2
+dash-colorscales==0.0.4
+
+stable-baselines[mpi]
+tensorflow==1.15.2
+plotly==4.8.2
+dash==1.13.3

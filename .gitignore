@@ -12,3 +12,8 @@ tensorboard_logs/*
 #Add exceptions for readmes so folders will be recognized
 !tensorboard_logs/README.md
 !trained_models/README.md
+!trained_models/ppo2_DeepWellEnv_v0.zip
+!trained_models/PPO2_DeepWellEnv3d
+!trained_models/PPO2_DeepWellEnv_v2
+!trained_models/DQN_DeepWellEnvSpherLevel5_8M.zip
+!trained_models/PPO2_DeepWellEnvSpher.zip

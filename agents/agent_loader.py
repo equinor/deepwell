@@ -35,14 +35,16 @@ class AgentLoader:
             model_name = datetime.now().strftime('%d%m%y-%H%M')
             print("Model name not given, name will be set to: ", model_name)
         #Set agent by giving it as an argument, default is dqnleveltrain
-        try: agent_name = sys.argv[4]
-        except:
+        agent_name = sys.argv[4]
+
+        if agent_name == " ":
             if text_argument == 'load':
                 agent_name = sys.argv[3]
             else:
                 print("Agent not specified, using default agent: dqnleveltrain()")
                 agent_name = dqnleveltrain()
 
+        
         if agent_name == 'ppo2': agent = ppo2()
         elif agent_name == 'ppo2leveltrain': agent = ppo2leveltrain()
         elif agent_name == 'ppo2callback' : agent = ppo2callback()

@@ -80,8 +80,8 @@ class DeepWellEnvSpher(gym.Env):
         self.z = 0 
 
         # Spherical coordinates
-        self.horizontal_ang = random.uniform(0, 2*np.pi)
-        self.vertical_ang = random.uniform(0, 5*np.pi/180)
+        self.horizontal_ang = 0  # random.uniform(0, 2*np.pi)  # for training random could be bette
+        self.vertical_ang = 0  # random.uniform(0, 5*np.pi/180)
         self.horizontal_angVel = 0
         self.vertical_angVel = 0
         self.horizontal_angAcc = 0
@@ -289,7 +289,8 @@ class DeepWellEnvSpher(gym.Env):
         randomly drawn between self.min_radius and self.max_radius.
         """
         # Separate targets in to equally spaced bins to avoid overlap
-        xsep = (self.xmax - self.xmin - 2*200)/self.numtargets
+        x_start = self.x + self.max_radius
+        xsep = (self.xmax - self.xmin - 200 - x_start)/self.numtargets
         maxz_change = self.maxdeltaZ_target  # (self.zmax - 200 - 1000)/2
         deltaY = self.deltaY_target
 
@@ -297,7 +298,7 @@ class DeepWellEnvSpher(gym.Env):
         for i in range(self.numtargets):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
-            x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
+            x = random.randint(int(x_start + i*xsep + radius), int(x_start + (i+1)*xsep - radius))
             y = random.randint(self.ymax/2 - deltaY, self.ymax/2 + deltaY)
             if i == 0:
                 z = random.randint(1000, self.zmax - 200)

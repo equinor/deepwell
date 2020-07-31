@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  gunicorn:
+    build: .
+    container_name: gunicorn_container
+    restart: always
+    tty: true
+    volumes:
+      - type: bind
+        source: .
+        target: /usr/src/app
+    expose:
+      - "8050"
+
+  mynginxdocker:
+    build: ./nginx
+    container_name: nginx_container
+    restart: always
+    volumes:
+      - type: bind
+        source: .
+        target: /usr/src/app
+    ports:
+      - "80:80"

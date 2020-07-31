@@ -9,6 +9,7 @@ import plotly.graph_objects as go # or plotly.express as px
 import numpy as np
 
 import plotly.express as px
+import pandas as pd
 
 
 class PlotServer():
@@ -27,7 +28,8 @@ class PlotServer():
     #Test the trained model, run until done, return list of visited coords
     def get_well_path(self, env, model):
         obs = env.reset()
-        pos_list = [env.get_pos()]      #Initialize list of path coordinates with initial position
+        #pos_list = [env.get_pos()]      #Initialize list of path coordinates with initial position
+        pos_list = [env.get_info(True)['pos']]
 
         while True:
             action, _states = model.predict(obs)
@@ -99,22 +101,42 @@ class PlotServer3d(PlotServer):
 class PlotServer2d(PlotServer):
 
     def show_model(self,env,model):
-        pos_list, info = self.get_well_path(self,env,model)
+        pos_list, info = self.get_well_path(env,model)
         targets = info['targets']
         hazards = info['hazards']
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=pos_list[:,0], y=pos_list[:,1],
-                    mode='lines',
-                    name='lines',
-                    title='Deepwell 2d plot'))
+        #fig = go.Figure()
+        #fig.add_trace(go.Scatter(x=pos_list[:,0], y=pos_list[:,1],
+        #            mode='lines',
+        #            name='lines',
+        #            title='Deepwell 2d plot'))
+
+        figure = px.line(x=pos_list[:,0], y=pos_list[:,1], line_shape="spline", render_mode="svg")
 
 
+        figure.update_layout(
+            scene = dict(
+                xaxis = dict(nticks=4, range=[env.xmin, env.xmax], title_text="x",),
+                yaxis = dict(nticks=4, title_text="y",),
+            ),
+        )
+
+        figure.update_yaxes(range=[env.ymax, env.ymin])
+
+        
+ 
+
+        target_list = []
+        hazard_list = []
         for i in range(len(targets)):
-            self.plot_ball(figure, "Target", 'greens', targets[i])
-
+            target_list.append(targets[i]['pos'])
+        
         for i in range(len(hazards)):
-            self.plot_ball(figure, "Hazard", 'reds', hazards[i])
+            hazard_list.append(hazards[i]['pos'])
+        
+        self.plot_marker(figure, "Hazard", 'reds', hazard_list)
+        self.plot_marker(figure, "Target", 'greens', target_list)
+
 
         figure.update_layout()
 
@@ -125,12 +147,15 @@ class PlotServer2d(PlotServer):
         self.start_server(figure)
 
 
-    def plot_disk(self, figure, name, color, object):
+    def plot_marker(self, figure, name, color, pos_list):
 
-        x0, y0 = object['pos']
-        radius = object['rad']
+        color_list = [color for i in range(len(pos_list))]
 
-        figure.add_trace()
+        x_list = [i[0] for i in pos_list]
+        y_list = [i[1] for i in pos_list]
+
+        figure.add_trace(go.Scatter(x=x_list, y=y_list,
+                    mode='markers', name=name))
     
 
 

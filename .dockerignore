@@ -1,2 +1,3 @@
 #Ignore tensorboard log files which caused error when building
 /logs/*
+webapp
