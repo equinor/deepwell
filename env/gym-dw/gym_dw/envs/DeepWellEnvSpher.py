@@ -80,8 +80,8 @@ class DeepWellEnvSpher(gym.Env):
         self.z = 0 
 
         # Spherical coordinates
-        self.horizontal_ang = random.uniform(0, 2*np.pi)
-        self.vertical_ang = random.uniform(0, 5*np.pi/180)
+        self.horizontal_ang = 0  # random.uniform(0, 2*np.pi)  # for training random could be bette
+        self.vertical_ang = 0  # random.uniform(0, 5*np.pi/180)
         self.horizontal_angVel = 0
         self.vertical_angVel = 0
         self.horizontal_angAcc = 0
