@@ -26,7 +26,7 @@ def calc_rel_ang(vec, vertical_ang, horizontal_ang):
     horizontal_rel_ang = calc_ang_diff(horizontal_ang, horizontal_object_ang)
     return vertical_rel_ang, horizontal_rel_ang
 
-class DeepWellEnvSpher(gym.Env):
+class DeepWellEnvSpherSmallObs(gym.Env):
 
     def __init__(self):
         self.xmin = 0
@@ -41,7 +41,7 @@ class DeepWellEnvSpher(gym.Env):
         self.min_radius = 100
         self.max_radius = 100
        
-        self.numhazards = 2     #==SET NUMBER OF HAZARDS==# 
+        self.numhazards = 7     #==SET NUMBER OF HAZARDS==# 
         self.min_radius_hazard = 100
         self.max_radius_hazard = 100
 
@@ -62,13 +62,9 @@ class DeepWellEnvSpher(gym.Env):
         state_high = np.array([
                                MAX_ANGACC, MAX_ANGACC,      # vertical_angAcc, horizontal_angAcc,
                                MAX_ANGVEL, MAX_ANGVEL,      # vertical_angVel, horizontal_angVel,
-                               np.pi, np.pi,                # vert_targ_rel_ang1, hori_targ_rel_ang1, target_dist1
-                               np.pi, np.pi,                # vert_targ_rel_ang2, hori_targ_rel_ang2, target_dist2
-                               np.pi, np.pi,                # vert_haz_rel_ang, hori_haz_rel_ang,
-                               max_dist, max_dist, max_dist # hazard_dist
-                               ])
+                               np.pi, np.pi])                # vert_targ_rel_ang1, hori_targ_rel_ang1, target_dist1
+                               
         state_low = -state_high.copy()
-        state_low[10], state_low[11], state_low[12] = 0, 0, 0
         self.observation_space = spaces.Box(low=state_low, high=state_high, dtype=np.float64)
 
     def init_states(self):
@@ -80,8 +76,12 @@ class DeepWellEnvSpher(gym.Env):
         self.z = 0 
 
         # Spherical coordinates
-        self.horizontal_ang = random.uniform(0, 2*np.pi)
-        self.vertical_ang = random.uniform(0, 5*np.pi/180)
+        #self.horizontal_ang = random.uniform(0, 2*np.pi)
+        #self.vertical_ang = random.uniform(0, 5*np.pi/180)
+
+        self.horizontal_ang = 0
+        self.vertical_ang = 0
+
         self.horizontal_angVel = 0
         self.vertical_angVel = 0
         self.horizontal_angAcc = 0
@@ -125,10 +125,7 @@ class DeepWellEnvSpher(gym.Env):
         state = np.array([
                 self.vertical_angAcc, self.horizontal_angAcc,
                 self.vertical_angVel, self.horizontal_angVel,
-                self.vert_targ_rel_ang1, self.hori_targ_rel_ang1, 
-                self.vert_targ_rel_ang2, self.hori_targ_rel_ang2,
-                self.vert_haz_rel_ang, self.hori_haz_rel_ang,
-                self.target_dist1, self.target_dist2, hazard_dist
+                self.vert_targ_rel_ang1, self.hori_targ_rel_ang1
                 ])
         return state
 
@@ -289,7 +286,8 @@ class DeepWellEnvSpher(gym.Env):
         randomly drawn between self.min_radius and self.max_radius.
         """
         # Separate targets in to equally spaced bins to avoid overlap
-        xsep = (self.xmax - self.xmin - 2*200)/self.numtargets
+        x_start = self.x + self.max_radius
+        xsep = (self.xmax - self.xmin - 200 - x_start)/self.numtargets
         maxz_change = self.maxdeltaZ_target  # (self.zmax - 200 - 1000)/2
         deltaY = self.deltaY_target
 
@@ -297,7 +295,7 @@ class DeepWellEnvSpher(gym.Env):
         for i in range(self.numtargets):
             radius = random.randint(self.min_radius, self.max_radius)
             # x drawn randomnly within bin edges minus the radius on each side
-            x = random.randint(200 + i*xsep + radius, 200 + (i+1)*xsep - radius)
+            x = random.randint(int(x_start + i*xsep + radius), int(x_start + (i+1)*xsep - radius))
             y = random.randint(self.ymax/2 - deltaY, self.ymax/2 + deltaY)
             if i == 0:
                 z = random.randint(1000, self.zmax - 200)

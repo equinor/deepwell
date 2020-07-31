@@ -1,6 +1,4 @@
 numpy
-#matplotlib
-#tornado
 stable-baselines[mpi]
 tensorflow==1.15.2
 plotly==4.8.2
